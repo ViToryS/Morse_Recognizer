@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/ic_flash_light"
+        android:title="Главная" />
+    <item
+        android:id="@+id/navigation_second"
+        android:icon="@drawable/ic_recognize"
+        android:title="Второй экран" />
+</menu>

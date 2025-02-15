@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.example.morse_recognizer'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.example.morse_recognizer"
         minSdk 24
-        targetSdk 34
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 
@@ -63,4 +63,12 @@ dependencies {
     androidTestImplementation libs.androidx.ui.test.junit4
     debugImplementation libs.androidx.ui.tooling
     debugImplementation libs.androidx.ui.test.manifest
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+//    implementation 'com.google.android.material:material:1.11.0'
+
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7' // Для фрагментов
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.7' // Для UI (например, BottomNavigationView)
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
 }
