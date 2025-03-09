@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Morse_recognizer</string>
+    <string name="app_name">Morse Transmitter</string>
+    <string name="need_permission">Требуется разрешение: доступ к камере</string>
+    <string name="camera_error">Камера недоступна</string>
+    <string name="enter_message">Передайте сообщение с помощью фонарика</string>
+    <string name="enter_in_edit_text_mes">Введите текст сообщения</string>
+    <string name="send_icon_mes">Транлировать</string>
+    <string name="rec_icon_mes">Распознать</string>
+    <string name="result_mes_hint">Результат распознавания будет здесь</string>
+
 </resources>

@@ -4,10 +4,13 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/mainFragment">
 
-    <!-- Главный фрагмент -->
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.morse_recognizer.MainFragment"
-        android:label="Главная" />
+        android:name="com.example.morse_recognizer.ui.SendingFragment"
+        android:label="Транслировать" />
 
+    <fragment
+        android:id="@+id/secondFragment"
+        android:name="com.example.morse_recognizer.ui.RecognizingFragment"
+        android:label="Распознать" />
 </navigation>

@@ -1,0 +1,6 @@
+<!-- res/drawable/rounded_border.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/transparent" /> <!-- Прозрачный фон -->
+    <corners android:radius="40dp" /> <!-- Закругленные углы -->
+    <stroke android:width="2dp" android:color="@color/purple_200" /> <!-- Граница -->
+</shape>
