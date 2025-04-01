@@ -27,6 +27,7 @@ public class SendingFragment extends Fragment implements FlashlightController.Tr
     private EditText inputField;
     private FlashlightController flashlightController;
     private ActivityResultLauncher<String> requestPermissionLauncher;
+    private Animation scaleAnimation;
 
     ImageButton sendButton;
     @Override
@@ -52,6 +53,7 @@ public class SendingFragment extends Fragment implements FlashlightController.Tr
         sendButton = view.findViewById(R.id.sendButton);
         flashlightController = new FlashlightController(requireContext());
         flashlightController.setTransmissionListener(this);
+        scaleAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_animation);
         sendButton.setOnClickListener(v -> {
             if (flashlightController.isTransmissionRunning()) {
                 stopMorseTransmission();}
@@ -90,11 +92,9 @@ public class SendingFragment extends Fragment implements FlashlightController.Tr
     private void updateButtonState(boolean isTransmitting) {
         sendButton.setSelected(isTransmitting);
         if (isTransmitting) {
-            Animation scaleDown = AnimationUtils.loadAnimation(getContext(), R.anim.scale_down);
-            sendButton.startAnimation(scaleDown);
+            sendButton.startAnimation(scaleAnimation);
         } else {
-            Animation scaleUp = AnimationUtils.loadAnimation(getContext(), R.anim.scale_up);
-            sendButton.startAnimation(scaleUp);
+            sendButton.clearAnimation();
         }
 }
 

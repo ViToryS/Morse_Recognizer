@@ -17,10 +17,10 @@ public class FlashlightController {
     private TransmissionListener transmissionListener;
 
     private static final long DOT_DURATION = 200;
-    private static final long DASH_DURATION = 600;
-    private static final long SYMBOL_PAUSE = 200;
-    private static final long LETTER_PAUSE = 400;
-    private static final long WORD_PAUSE   = 1000;
+    private static final long DASH_DURATION = DOT_DURATION*3;
+    private static final long SYMBOL_PAUSE = DOT_DURATION;
+    private static final long LETTER_PAUSE = DOT_DURATION*2;
+    private static final long WORD_PAUSE   = DOT_DURATION*4;
     private char previousSymbol = '0';
     private final CameraManager cameraManager;
     private String cameraId;
@@ -105,10 +105,9 @@ public class FlashlightController {
                 break;
             default:
                 if (previousSymbol == '+') {
-                    handler.postDelayed(() -> {
-                        previousSymbol = symbol;
-                        transmitMorseCode(morseCode, index + 1);
-                    }, SYMBOL_PAUSE);}
+                    previousSymbol = symbol;
+                    transmitMorseCode(morseCode, index + 1);
+                }
                 else{
                     handler.postDelayed(() -> {
                         previousSymbol = symbol;

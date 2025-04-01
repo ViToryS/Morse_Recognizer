@@ -7,5 +7,7 @@
     <string name="send_icon_mes">Транлировать</string>
     <string name="rec_icon_mes">Распознать</string>
     <string name="result_mes_hint">Результат распознавания будет здесь</string>
+    <string name="brightness_text">Порог \nяркости</string>
+    <string name="text_result_hint_recognize">Перевод будет здесь</string>
 
 </resources>

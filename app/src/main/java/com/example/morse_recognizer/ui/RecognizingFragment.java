@@ -1,6 +1,9 @@
 package com.example.morse_recognizer.ui;
 
+import android.graphics.ImageFormat;
+import android.media.Image;
 import android.content.pm.PackageManager;
+import android.media.ImageReader;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,8 +13,11 @@ import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
 import androidx.activity.result.ActivityResultLauncher;
@@ -24,22 +30,27 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.morse_recognizer.R;
 import com.example.morse_recognizer.utils.CameraHelper;
 import com.example.morse_recognizer.utils.RecognizingViewModel;
-
+import android.view.animation.AnimationUtils;
 import com.example.morse_recognizer.utils.FlashDetector;
-import com.example.morse_recognizer.utils.MorseDecoder;
 
-public class RecognizingFragment extends Fragment {
+public class RecognizingFragment extends Fragment implements FlashDetector.BrightnessListener{
 
     private TextureView textureView;
+    private TextView resultTextView;
     private ImageView placeholderImage;
     private ImageButton btnRecognize;
+    private TextView currentBrightnessTextView;
+
+    private RecognizingViewModel viewModel;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
     private CameraHelper cameraHelper;
     private Handler backgroundHandler;
     private HandlerThread backgroundThread;
-    private RecognizingViewModel viewModel;
 
+    private FlashDetector flashDetector;
+    private Animation scaleAnimation;
 
-    private ActivityResultLauncher<String> requestPermissionLauncher;
+    private boolean isRecognizing = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,8 +58,7 @@ public class RecognizingFragment extends Fragment {
 
         viewModel = new ViewModelProvider(this).get(RecognizingViewModel.class);
         cameraHelper = new CameraHelper();
-
-
+        flashDetector = new FlashDetector();
         requestPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
@@ -68,10 +78,61 @@ public class RecognizingFragment extends Fragment {
         textureView = view.findViewById(R.id.textureView);
         btnRecognize = view.findViewById(R.id.btnRecognize);
         placeholderImage = view.findViewById(R.id.placeholderImage);
-
+        resultTextView = view.findViewById(R.id.resultTextView);
         textureView.setOnClickListener(v -> toggleCamera());
+        btnRecognize.setOnClickListener(v -> startRecognition());
+        TextView brightnessValueTextView = view.findViewById(R.id.brightnessValueTextView);
+        currentBrightnessTextView = view.findViewById(R.id.currentBrightnessTextView);
+        SeekBar brightnessSeekBar = view.findViewById(R.id.brightnessSeekBar);
 
+        scaleAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_animation);
+        flashDetector.setBrightnessListener(this);
+
+        brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                flashDetector.setBrightnessThreshold(progress);
+                brightnessValueTextView.setText(String.valueOf(progress));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
         return view;
+    }
+    private void startRecognition() {
+        if (viewModel.getIsCameraOn().getValue() == null || !viewModel.getIsCameraOn().getValue()) {
+            Toast.makeText(requireContext(), "Камера отключена. Включите камеру для распознавания.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (backgroundHandler == null) {
+            startBackgroundThread();
+            Log.d("Потоки: ", "Фоновый поток запущен после нажатия на кнопку");
+        }
+        if (!isRecognizing) {
+            isRecognizing = true;
+            Log.d("Recognizing", "Обработка кадров начата");
+            btnRecognize.setActivated(true);
+            flashDetector.reset();
+            btnRecognize.startAnimation(scaleAnimation);
+        } else {
+            isRecognizing = false;
+            Log.d("Recognizing", "Обработка кадров остановлена");
+            btnRecognize.setActivated(false);
+            btnRecognize.clearAnimation();
+        }
+    }
+
+    private void stopRecognition() {
+        isRecognizing = false;
+        Log.d("Recognizing", "Обработка кадров остановлена");
+        btnRecognize.setActivated(false);
+        btnRecognize.clearAnimation();
+
     }
 
 
@@ -84,6 +145,7 @@ public class RecognizingFragment extends Fragment {
             }
         } else {
             closeCamera();
+            stopRecognition();
         }
         viewModel.toggleCamera();
         updatePlaceholderVisibility();
@@ -100,13 +162,32 @@ public class RecognizingFragment extends Fragment {
 
     private void startCamera() {
         if (backgroundHandler == null) {
-            startBackgroundThread(); // Запустить поток, если он не активен
+            startBackgroundThread();
         }
-        cameraHelper.startCamera(requireContext(), textureView, backgroundHandler);
+        int width = textureView.getWidth();
+        int height = textureView.getHeight();
+        ImageReader imageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2);
+        imageReader.setOnImageAvailableListener(reader -> {
+            Image image = reader.acquireLatestImage();
+            if (image != null && isRecognizing) {
+                flashDetector.processImage(image, true);
+
+                image.close();
+            } else if (image != null) {
+                flashDetector.processImage(image, false);
+                image.close();
+            }
+        }, backgroundHandler);
+
+        cameraHelper = new CameraHelper();
+        cameraHelper.startCamera(requireContext(), textureView, backgroundHandler, imageReader);
+
     }
 
     private void closeCamera() {
         cameraHelper.closeCamera();
+        stopRecognition();
+        btnRecognize.clearAnimation();
     }
 
     @Override
@@ -122,14 +203,15 @@ public class RecognizingFragment extends Fragment {
     @Override
     public void onPause() {
         closeCamera();
-        stopBackgroundThread(); // Остановить фоновый поток
+        stopRecognition();
+        stopBackgroundThread();
         super.onPause();
     }
 
     @Override
     public void onDestroyView() {
         closeCamera();
-        stopBackgroundThread(); // Остановить фоновый поток
+        stopBackgroundThread();
         super.onDestroyView();
     }
 
@@ -185,5 +267,19 @@ public class RecognizingFragment extends Fragment {
             placeholderImage.setVisibility(View.VISIBLE);
             Log.d("камера", "Message: " + "показать фото");
         }
+    }
+
+    @Override
+    public void onBrightnessChanged(int brightness) {
+        requireActivity().runOnUiThread(() -> {
+            String text = "Текущая яркость: " + brightness;
+            currentBrightnessTextView.setText(text);
+        });
+    }
+    @Override
+    public void onTextUpdated(String text) {
+        requireActivity().runOnUiThread(() -> {
+            resultTextView.setText(text);
+        });
     }
 }

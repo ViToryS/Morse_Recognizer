@@ -7,11 +7,11 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
+import android.media.ImageReader;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
-
 
 import androidx.annotation.NonNull;
 
@@ -23,10 +23,12 @@ public class CameraHelper {
     private CameraDevice cameraDevice;
     private CameraCaptureSession cameraCaptureSession;
     private Handler backgroundHandler;
+    private ImageReader imageReader;
 
-
-    public void startCamera(Context context, TextureView textureView, Handler backgroundHandler) {
+    public void startCamera(Context context, TextureView textureView, Handler backgroundHandler, ImageReader imageReader) {
         this.backgroundHandler = backgroundHandler;
+        this.imageReader = imageReader;
+
         CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
 
         try {
@@ -70,9 +72,9 @@ public class CameraHelper {
 
             final CaptureRequest.Builder captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.addTarget(surface);
+            captureRequestBuilder.addTarget(imageReader.getSurface());
 
-
-            cameraDevice.createCaptureSession(Arrays.asList(surface), new CameraCaptureSession.StateCallback() {
+            cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()), new CameraCaptureSession.StateCallback() {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     if (cameraDevice == null) return;

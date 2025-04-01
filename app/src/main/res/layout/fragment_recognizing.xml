@@ -4,82 +4,208 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginTop="115dp">
+
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cameraContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="16dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:minWidth="150dp"
         app:cardCornerRadius="30dp"
         app:cardBackgroundColor="@android:color/transparent"
         app:cardElevation="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnRecognize"
         app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/scrollView"
+        app:layout_constraintHeight_default="wrap"
+    app:layout_constraintVertical_chainStyle="packed"
 
-        <FrameLayout
+        >
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="2dp">
+
+        <TextureView
+            android:id="@+id/textureView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="2dp">
+            android:clickable="true"
+            android:focusable="true" />
 
-            <!-- TextureView для отображения видеопотока -->
-            <TextureView
-                android:id="@+id/textureView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clickable="true"
-                android:focusable="true" />
 
-            <!-- Изображение-заглушка -->
-            <ImageView
-                android:id="@+id/placeholderImage"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_camera_placeholder"
-                android:visibility="visible" />
-        </FrameLayout>
-    </androidx.cardview.widget.CardView>
-    <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnRecognize"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cameraContainer">
-
-        <TextView
-            android:id="@+id/resultTextView"
+        <ImageView
+            android:id="@+id/placeholderImage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:minHeight="64dp"
-            android:background="@drawable/rounded_edittext"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:scrollbars="vertical"
-            android:hint="@string/result_mes_hint"
-            android:textColorHint="#888888"/>
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_camera_placeholder"
+            android:visibility="visible" />
+    </FrameLayout>
+</androidx.cardview.widget.CardView>
+
+
+<ScrollView
+    android:id="@+id/scrollView"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:padding="5dp"
+    android:background="@drawable/rounded_edittext"
+    android:layout_marginEnd="10dp"
+    android:layout_marginBottom="5dp"
+    android:minHeight="100dp"
+    app:layout_constraintBottom_toTopOf="@+id/textScrollView"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/cameraContainer">
+
+    <TextView
+        android:id="@+id/resultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:minHeight="50dp"
+        android:textColor="@android:color/black"
+        android:textSize="12sp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:scrollbars="vertical"
+        android:hint="@string/result_mes_hint"
+        android:textColorHint="#888888"/>
     </ScrollView>
 
-    <ImageButton
-        android:id="@+id/btnRecognize"
-        android:layout_width="127dp"
-        android:layout_height="110dp"
-        android:layout_marginBottom="16dp"
-        android:scaleType="centerInside"
-        android:background="@drawable/button_selector"
-        android:src="@drawable/ic_recognize_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+<ScrollView
+    android:id="@+id/textScrollView"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="14dp"
+    android:padding="5dp"
+    android:background="@drawable/rounded_edittext"
+    android:layout_marginBottom="8dp"
+    android:minHeight="100dp"
+    app:layout_constraintBottom_toTopOf="@+id/brightnessLabel"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/scrollView">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/textResultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:minHeight="50dp"
+        android:textColor="@android:color/black"
+        android:textSize="12sp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:scrollbars="vertical"
+        android:hint="@string/text_result_hint_recognize"
+        android:textColorHint="#888888"/>
+</ScrollView>
+
+    <TextView
+        android:id="@+id/brightnessLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/brightness_text"
+        android:textSize="12sp"
+        android:textColor="@android:color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textScrollView"/> />
+
+    <SeekBar
+        android:id="@+id/brightnessSeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:max="255"
+        android:progress="130"
+        android:progressDrawable="@drawable/custom_progress"
+        android:thumb="@drawable/custom_thumb"
+        app:layout_constraintStart_toEndOf="@+id/brightnessLabel"
+        app:layout_constraintEnd_toStartOf="@+id/brightnessValueTextView"
+        app:layout_constraintTop_toBottomOf="@+id/textScrollView"/>
+
+
+<TextView
+    android:id="@+id/brightnessValueTextView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
+    android:layout_marginTop="4dp"
+    android:textColor="@color/black"
+    android:text="130"
+    app:layout_constraintBottom_toBottomOf="@+id/brightnessSeekBar"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/brightnessLabel" />
+
+<TextView
+    android:id="@+id/currentBrightnessTextView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:text="Текущая яркость: 0"
+    android:textSize="12sp"
+    android:textColor="@android:color/black"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/brightnessSeekBar"/>
+
+
+    <LinearLayout
+        android:id="@+id/buttonGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/currentBrightnessTextView">
+
+        <ImageButton
+            android:id="@+id/btnLanguage"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_selector"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_speak_button" />
+
+        <ImageButton
+            android:id="@+id/btnRecognize"
+            android:layout_width="75dp"
+            android:layout_height="65dp"
+            android:background="@drawable/button_selector"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_recognize_button" />
+
+        <ImageButton
+            android:id="@+id/btnSpeak"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/button_selector"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_speak_button" />
+    </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
