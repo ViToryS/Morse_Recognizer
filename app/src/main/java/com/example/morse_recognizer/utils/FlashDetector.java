@@ -84,7 +84,7 @@ public class FlashDetector {
         isFlashOn = true;
 
         if (lastFlashTime == 0) {
-            appendToResultText("+");
+            appendToResultText("+  ");
             lastFlashTime = currentTime;
             Log.d(TAG, "Вспышка обнаружена: " + lastFlashTime);
             return;
@@ -99,7 +99,7 @@ public class FlashDetector {
             } else if (pauseDuration < DOT_DURATION_THRESHOLD * 3 * coefficient) {
                 appendToResultText("  ");
             } else {
-                appendToResultText(" + ");
+                appendToResultText("  +  ");
             }
         }
 

@@ -26,21 +26,25 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.example.morse_recognizer.R;
 import com.example.morse_recognizer.utils.CameraHelper;
+import com.example.morse_recognizer.utils.MorseCodeConverter;
 import com.example.morse_recognizer.utils.RecognizingViewModel;
 import android.view.animation.AnimationUtils;
 import com.example.morse_recognizer.utils.FlashDetector;
+import com.example.morse_recognizer.utils.TextToSpeechHelper;
 
 public class RecognizingFragment extends Fragment implements FlashDetector.BrightnessListener{
 
     private TextureView textureView;
     private TextView resultTextView;
+    private TextView translatedresultTextView;
     private ImageView placeholderImage;
     private ImageButton btnRecognize;
+    private ImageButton btnSpeak;
     private TextView currentBrightnessTextView;
-
+    private MorseCodeConverter.Language currentLanguage;
+    private TextToSpeechHelper ttsHelper;
     private RecognizingViewModel viewModel;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private CameraHelper cameraHelper;
@@ -49,8 +53,8 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
 
     private FlashDetector flashDetector;
     private Animation scaleAnimation;
-
     private boolean isRecognizing = false;
+    TextView btnLanguage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -77,17 +81,55 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
 
         textureView = view.findViewById(R.id.textureView);
         btnRecognize = view.findViewById(R.id.btnRecognize);
+        btnLanguage = view.findViewById(R.id.btnLanguage);
         placeholderImage = view.findViewById(R.id.placeholderImage);
         resultTextView = view.findViewById(R.id.resultTextView);
-        textureView.setOnClickListener(v -> toggleCamera());
-        btnRecognize.setOnClickListener(v -> startRecognition());
+        translatedresultTextView = view.findViewById(R.id.textResultTextView);
         TextView brightnessValueTextView = view.findViewById(R.id.brightnessValueTextView);
         currentBrightnessTextView = view.findViewById(R.id.currentBrightnessTextView);
         SeekBar brightnessSeekBar = view.findViewById(R.id.brightnessSeekBar);
-
+        btnSpeak = view.findViewById(R.id.btnSpeak);
         scaleAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_animation);
-        flashDetector.setBrightnessListener(this);
 
+        flashDetector.setBrightnessListener(this);
+        textureView.setOnClickListener(v -> toggleCamera());
+        btnRecognize.setOnClickListener(v -> startRecognition());
+
+        ttsHelper = new TextToSpeechHelper(requireContext());
+        ttsHelper.setListener(new TextToSpeechHelper.TTSListener() {
+            @Override
+            public void onSpeechStart() {
+                btnSpeak.setActivated(true);
+                btnSpeak.startAnimation(scaleAnimation);
+            }
+            @Override
+            public void onSpeechDone() {
+                btnSpeak.setActivated(false);
+                btnSpeak.clearAnimation();
+
+            }
+
+            @Override
+            public void onSpeechError(String error) {
+            }
+        });
+        currentLanguage = MorseCodeConverter.getCurrentLanguage();
+        updateLanguageButton();
+
+        btnSpeak.setOnClickListener(v -> {
+            String textToSpeak = translatedresultTextView.getText().toString();
+            if (!textToSpeak.isEmpty()) {
+                String languageCode = MorseCodeConverter.getCurrentLanguage().getTtsCode();
+                ttsHelper.setLanguage(languageCode); // Устанавливаем язык
+                ttsHelper.speak(textToSpeak, languageCode);
+            }
+        });
+        btnLanguage.setOnClickListener(v -> {
+            currentLanguage = MorseCodeConverter.Language.getNext(currentLanguage);
+            MorseCodeConverter.setLanguage(currentLanguage);
+            updateLanguageButton();
+            showResult();
+        });
         brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -104,9 +146,11 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
         });
         return view;
     }
+
     private void startRecognition() {
         if (viewModel.getIsCameraOn().getValue() == null || !viewModel.getIsCameraOn().getValue()) {
-            Toast.makeText(requireContext(), "Камера отключена. Включите камеру для распознавания.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Камера отключена. Включите камеру для распознавания.",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
         if (backgroundHandler == null) {
@@ -118,12 +162,14 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
             Log.d("Recognizing", "Обработка кадров начата");
             btnRecognize.setActivated(true);
             flashDetector.reset();
+            resettingResults();
             btnRecognize.startAnimation(scaleAnimation);
         } else {
             isRecognizing = false;
             Log.d("Recognizing", "Обработка кадров остановлена");
             btnRecognize.setActivated(false);
             btnRecognize.clearAnimation();
+            showResult();
         }
     }
 
@@ -212,6 +258,7 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
     public void onDestroyView() {
         closeCamera();
         stopBackgroundThread();
+        ttsHelper.shutdown();
         super.onDestroyView();
     }
 
@@ -282,4 +329,20 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
             resultTextView.setText(text);
         });
     }
+
+    public void showResult() {
+        requireActivity().runOnUiThread(() -> {
+            String translatedText = MorseCodeConverter.
+                    convertFromMorse(resultTextView.getText().toString());
+            translatedresultTextView.setText(translatedText);
+        });
+    }
+
+
+    public void resettingResults() {
+        translatedresultTextView.setText("");
+        resultTextView.setText("");
+    }
+    private void updateLanguageButton() {
+        btnLanguage.setText(currentLanguage.getButtonText());}
 }

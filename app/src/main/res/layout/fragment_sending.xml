@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -22,50 +21,110 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/inputField"
+    <LinearLayout
+        android:id="@+id/fieldsContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:padding="10dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/buttonManageGroup"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView">
+
+        <EditText
+            android:id="@+id/inputField"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:minHeight="100dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_edittext"
+            android:hint="@string/enter_in_edit_text_mes"
+            android:textColorHint="#888888"
+            android:inputType="textMultiLine"
+            android:gravity="top|start"
+            android:padding="16dp"
+            android:scrollbars="vertical"
+            android:textColor="#000000"
+            android:textSize="18sp"/>
+
+        <ScrollView
+            android:id="@+id/resultScrollContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_edittext">
+
+            <TextView
+                android:id="@+id/translatedResultField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="100dp"
+                android:padding="16dp"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                android:hint="@string/text_result_hint_recognize"
+                android:textColorHint="#888888"
+                android:textIsSelectable="true"
+                android:gravity="top|start"
+                android:scrollbars="none"/>
+        </ScrollView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/buttonManageGroup"
         android:layout_width="wrap_content"
-        android:layout_height="197dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/rounded_edittext"
-        android:hint="@string/enter_in_edit_text_mes"
-        android:textColorHint="#888888"
-        android:inputType="text"
-        android:padding="16dp"
-        android:scrollbars="vertical"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/voiceInputButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
-
-    <ImageButton
-        android:id="@+id/voiceInputButton"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/button_selector"
-        android:padding="14dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_mic"
-        app:layout_constraintBottom_toBottomOf="@id/inputField"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/inputField"
-        app:layout_constraintTop_toTopOf="@id/inputField"
-        app:layout_constraintVertical_bias="0.49" />
-
-    <ImageButton
-        android:id="@+id/sendButton"
-        android:layout_width="127dp"
-        android:layout_height="110dp"
-        android:layout_marginBottom="80dp"
-        android:background="@drawable/button_selector"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_flash_button"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fieldsContainer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        tools:layout_editor_absoluteX="139dp" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/btnLanguage"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/button_selector"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:text="@string/default_language_text"
+            android:textStyle="bold"
+            android:padding="5dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:minWidth="35dp"
+            android:minHeight="35dp" />
+
+        <ImageButton
+            android:id="@+id/sendButton"
+            android:layout_width="75dp"
+            android:layout_height="65dp"
+            android:background="@drawable/button_selector"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_flash_button" />
+
+        <ImageButton
+            android:id="@+id/voiceInputButton"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/button_selector"
+            android:scaleType="centerInside"
+            android:padding="5dp"
+            android:src="@drawable/ic_mic" />
+    </LinearLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

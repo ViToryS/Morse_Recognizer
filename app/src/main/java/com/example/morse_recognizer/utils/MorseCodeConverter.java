@@ -2,67 +2,49 @@ package com.example.morse_recognizer.utils;
 
 import android.util.Log;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class MorseCodeConverter {
+    private static Language currentLanguage = Language.RUSSIAN;
 
-    private static final Map<Character, String> morseCodeMap = new HashMap<>();
+    public enum Language {
+        RUSSIAN("ru", "Рус", MorseCodeMaps.RUSSIAN_TO_MORSE, MorseCodeMaps.MORSE_TO_RUSSIAN),
+        ENGLISH("en", "Анг", MorseCodeMaps.ENGLISH_TO_MORSE, MorseCodeMaps.MORSE_TO_ENGLISH);
 
-    static {
-        morseCodeMap.put('А', ".-");
-        morseCodeMap.put('Б', "-...");
-        morseCodeMap.put('В', ".--");
-        morseCodeMap.put('Г', "--.");
-        morseCodeMap.put('Д', "-..");
-        morseCodeMap.put('Е', ".");
-        morseCodeMap.put('Ж', "...-");
-        morseCodeMap.put('З', "--..");
-        morseCodeMap.put('И', "..");
-        morseCodeMap.put('Й', ".---");
-        morseCodeMap.put('К', "-.-");
-        morseCodeMap.put('Л', ".-..");
-        morseCodeMap.put('М', "--");
-        morseCodeMap.put('Н', "-.");
-        morseCodeMap.put('О', "---");
-        morseCodeMap.put('П', ".--.");
-        morseCodeMap.put('Р', ".-.");
-        morseCodeMap.put('С', "...");
-        morseCodeMap.put('Т', "-");
-        morseCodeMap.put('У', "..-");
-        morseCodeMap.put('Ф', "..-.");
-        morseCodeMap.put('Х', "....");
-        morseCodeMap.put('Ц', "-.-.");
-        morseCodeMap.put('Ч', "---.");
-        morseCodeMap.put('Ш', "----");
-        morseCodeMap.put('Щ', "--.-");
-        morseCodeMap.put('Ъ', "--.--");
-        morseCodeMap.put('Ы', "-.--");
-        morseCodeMap.put('Ь', "-..-");
-        morseCodeMap.put('Э', "..-..");
-        morseCodeMap.put('Ю', "..--");
-        morseCodeMap.put('Я', ".-.-");
+        private final String ttsCode;
+        private final String buttonText;
+        final Map<Character, String> toMorseMap;
+        final Map<String, Character> fromMorseMap;
+
+        Language(String ttsCode, String buttonText, Map<Character, String> toMorse, Map<String, Character> fromMorse) {
+            this.ttsCode = ttsCode;
+            this.toMorseMap = toMorse;
+            this.fromMorseMap = fromMorse;
+            this.buttonText = buttonText;
+
+        }
+        public String getTtsCode() {
+            return ttsCode;
+        }
+        public String getButtonText() {
+            return buttonText;
+        }
+        public static Language getNext(Language current) {
+            Language[] languages = values();
+            int nextIndex = (current.ordinal() + 1) % languages.length;
+            return languages[nextIndex];
+        }
+    }
 
 
-        morseCodeMap.put('0', "-----");
-        morseCodeMap.put('1', ".----");
-        morseCodeMap.put('2', "..---");
-        morseCodeMap.put('3', "...--");
-        morseCodeMap.put('4', "....-");
-        morseCodeMap.put('5', ".....");
-        morseCodeMap.put('6', "-....");
-        morseCodeMap.put('7', "--...");
-        morseCodeMap.put('8', "---..");
-        morseCodeMap.put('9', "----.");
+    public static void setLanguage(Language language) {
+        currentLanguage = language;
+    }
 
-        morseCodeMap.put('.', "......");
-        morseCodeMap.put(',', ".-.-.-");
-        morseCodeMap.put('?', "..--..");
-        morseCodeMap.put('!', "--..--");
-        morseCodeMap.put('-', "-....-");
-
-        morseCodeMap.put(' ', "+");
-}
+    public static Language getCurrentLanguage() {
+        return currentLanguage;
+    }
 
 
     public static String convertToMorse(String text) {
@@ -73,13 +55,31 @@ public class MorseCodeConverter {
         StringBuilder morseCode = new StringBuilder();
         String upperText = text.toUpperCase();
         for (char c : upperText.toCharArray())  {
-
-            if (morseCodeMap.containsKey(c)) {
-                morseCode.append(morseCodeMap.get(c)).append(" ");
-
-            }
+            String code = currentLanguage.toMorseMap.get(c);
+            morseCode.append(Objects.requireNonNullElse(code, "*")).append(" ");
         Log.d("MORSE", "Message: " + morseCode);
         }
         return morseCode.toString().trim();
+    }
+
+    public static String convertFromMorse(String morseText) {
+        if (morseText == null || morseText.isEmpty()) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
+        String[] morseCodes = morseText.split(" {2}");
+
+        for (String code : morseCodes) {
+            if (code.isEmpty()) {
+                continue;
+            }
+            Character character = currentLanguage.fromMorseMap.get(code);
+            if (character != null) {
+                result.append(character);
+            } else {
+                result.append("*");
+            }
+        }
+        return result.toString().toLowerCase();
     }
 }

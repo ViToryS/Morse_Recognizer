@@ -7,27 +7,34 @@
     android:layout_height="match_parent"
     android:layout_marginTop="115dp">
 
+    <LinearLayout
+        android:id="@+id/fieldsContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="5dp"
+
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/brightnessSeekBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cameraContainer"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        android:minWidth="150dp"
+        android:layout_weight="3"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:minWidth="140dp"
+        android:minHeight="140dp"
         app:cardCornerRadius="30dp"
         app:cardBackgroundColor="@android:color/transparent"
         app:cardElevation="0dp"
         app:layout_constraintDimensionRatio="H,1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/scrollView"
-        app:layout_constraintHeight_default="wrap"
-    app:layout_constraintVertical_chainStyle="packed"
-
-        >
+    app:layout_constraintVertical_chainStyle="packed">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -40,7 +47,6 @@
             android:layout_height="match_parent"
             android:clickable="true"
             android:focusable="true" />
-
 
         <ImageView
             android:id="@+id/placeholderImage"
@@ -55,28 +61,24 @@
 
 <ScrollView
     android:id="@+id/scrollView"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="0dp"
-    android:layout_marginStart="16dp"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
     android:layout_marginTop="16dp"
-    android:padding="5dp"
+    android:padding="10dp"
+    android:layout_weight="1"
     android:background="@drawable/rounded_edittext"
-    android:layout_marginEnd="10dp"
     android:layout_marginBottom="5dp"
-    android:minHeight="100dp"
-    app:layout_constraintBottom_toTopOf="@+id/textScrollView"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/cameraContainer">
+    >
 
     <TextView
         android:id="@+id/resultTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:minHeight="50dp"
+        android:padding="5dp"
         android:textColor="@android:color/black"
-        android:textSize="12sp"
+        android:textSize="18sp"
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:scrollbars="vertical"
@@ -86,28 +88,25 @@
 
 <ScrollView
     android:id="@+id/textScrollView"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="0dp"
-    android:layout_marginStart="16dp"
+    android:layout_weight="1"
+    android:layout_marginStart="15dp"
     android:layout_marginTop="8dp"
-    android:layout_marginEnd="14dp"
-    android:padding="5dp"
+    android:layout_marginEnd="15dp"
+    android:padding="10dp"
     android:background="@drawable/rounded_edittext"
     android:layout_marginBottom="8dp"
-    android:minHeight="100dp"
-    app:layout_constraintBottom_toTopOf="@+id/brightnessLabel"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/scrollView">
+>
 
     <TextView
         android:id="@+id/textResultTextView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:minHeight="50dp"
+        android:layout_height="0dp"
+        android:padding="5dp"
+        android:minHeight="80dp"
         android:textColor="@android:color/black"
-        android:textSize="12sp"
+        android:textSize="18sp"
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:scrollbars="vertical"
@@ -115,6 +114,7 @@
         android:textColorHint="#888888"/>
 </ScrollView>
 
+    </LinearLayout>
     <TextView
         android:id="@+id/brightnessLabel"
         android:layout_width="wrap_content"
@@ -125,7 +125,7 @@
         android:textSize="12sp"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textScrollView"/> />
+        app:layout_constraintTop_toBottomOf="@+id/fieldsContainer"/> />
 
     <SeekBar
         android:id="@+id/brightnessSeekBar"
@@ -141,7 +141,7 @@
         android:thumb="@drawable/custom_thumb"
         app:layout_constraintStart_toEndOf="@+id/brightnessLabel"
         app:layout_constraintEnd_toStartOf="@+id/brightnessValueTextView"
-        app:layout_constraintTop_toBottomOf="@+id/textScrollView"/>
+        app:layout_constraintTop_toBottomOf="@+id/fieldsContainer"/>
 
 
 <TextView
@@ -181,14 +181,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/currentBrightnessTextView">
 
-        <ImageButton
+        <TextView
             android:id="@+id/btnLanguage"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/button_selector"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_speak_button" />
+            android:gravity="center"
+            android:textSize="14sp"
+            android:textColor="#000000"
+            android:text="@string/default_language_text"
+            android:padding="5dp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"/>
 
         <ImageButton
             android:id="@+id/btnRecognize"
@@ -200,8 +206,9 @@
 
         <ImageButton
             android:id="@+id/btnSpeak"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:padding="5dp"
             android:layout_marginStart="16dp"
             android:background="@drawable/button_selector"
             android:scaleType="centerInside"
