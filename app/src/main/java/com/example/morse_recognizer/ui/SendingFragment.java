@@ -3,13 +3,10 @@ package com.example.morse_recognizer.ui;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -21,7 +18,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.morse_recognizer.R;
 import com.example.morse_recognizer.utils.FlashlightController;
 import com.example.morse_recognizer.utils.MorseCodeConverter;

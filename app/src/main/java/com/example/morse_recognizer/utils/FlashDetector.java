@@ -2,7 +2,7 @@ package com.example.morse_recognizer.utils;
 
 import android.media.Image;
 import android.util.Log;
-
+import static com.example.morse_recognizer.values.MorseConstants.*;
 import java.nio.ByteBuffer;
 
 public class FlashDetector {
@@ -12,10 +12,8 @@ public class FlashDetector {
     }
 
     private int previousBrightness = 0;
-    private static final int BRIGHTNESS_CHANGE_THRESHOLD = 30;
     private static final String TAG = "FlashDetector";
-    private static final int DOT_DURATION_THRESHOLD = 200;
-    private static final double coefficient = 1.5;
+    private static final int DOT_DURATION_THRESHOLD = 300;
     private int brightnessThreshold = 130;
     private long lastFlashTime = 0;
     private long lastFlashEndTime = 0;
@@ -94,9 +92,9 @@ public class FlashDetector {
         if (lastFlashEndTime > 0) {
             long pauseDuration = lastFlashTime - lastFlashEndTime;
             Log.d(TAG, "ПАУЗА. Время: " + pauseDuration + "  Яркость: " + previousBrightness);
-            if (pauseDuration < DOT_DURATION_THRESHOLD * coefficient) {
+            if (pauseDuration < DOT_DURATION_THRESHOLD * COEFFICIENT) {
                 appendToResultText("");
-            } else if (pauseDuration < DOT_DURATION_THRESHOLD * 3 * coefficient) {
+            } else if (pauseDuration < DOT_DURATION_THRESHOLD * 3 * COEFFICIENT) {
                 appendToResultText("  ");
             } else {
                 appendToResultText("  +  ");
@@ -113,7 +111,7 @@ public class FlashDetector {
         lastFlashEndTime = currentTime;
         long flashDuration = lastFlashEndTime - lastFlashTime;
 
-        if (flashDuration < DOT_DURATION_THRESHOLD * coefficient) {
+        if (flashDuration < DOT_DURATION_THRESHOLD / COEFFICIENT ) {
             appendToResultText(".");
         } else {
             appendToResultText("-");

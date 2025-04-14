@@ -35,7 +35,7 @@ import com.example.morse_recognizer.utils.FlashDetector;
 import com.example.morse_recognizer.utils.TextToSpeechHelper;
 
 public class RecognizingFragment extends Fragment implements FlashDetector.BrightnessListener{
-
+    private CameraHelper cameraHelper;
     private TextureView textureView;
     private TextView resultTextView;
     private TextView translatedresultTextView;
@@ -47,7 +47,7 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
     private TextToSpeechHelper ttsHelper;
     private RecognizingViewModel viewModel;
     private ActivityResultLauncher<String> requestPermissionLauncher;
-    private CameraHelper cameraHelper;
+
     private Handler backgroundHandler;
     private HandlerThread backgroundThread;
 

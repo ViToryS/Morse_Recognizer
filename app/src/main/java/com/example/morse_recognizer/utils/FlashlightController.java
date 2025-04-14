@@ -1,32 +1,19 @@
 package com.example.morse_recognizer.utils;
 
-
 import android.content.Context;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
-import android.widget.Toast;
 
-import com.example.morse_recognizer.R;
-
-import java.util.Objects;
+import static com.example.morse_recognizer.values.MorseConstants.*;
 
 public class FlashlightController {
+    private final TorchHelper torchHelper;
     private TransmissionListener transmissionListener;
-
-    private static final long DOT_DURATION = 200;
-    private static final long DASH_DURATION = DOT_DURATION*3;
-    private static final long SYMBOL_PAUSE = DOT_DURATION;
-    private static final long LETTER_PAUSE = DOT_DURATION*2;
-    private static final long WORD_PAUSE   = DOT_DURATION*4;
-    private char previousSymbol = '0';
-    private final CameraManager cameraManager;
-    private String cameraId;
-    private boolean isTorchOn = false;
-    private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean transmissionRunning = false;
+
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
 
     public interface TransmissionListener {
         void onTransmissionStopped();
@@ -36,107 +23,70 @@ public class FlashlightController {
     }
 
     public FlashlightController(Context context) {
-        cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-        try {
-            cameraId = cameraManager.getCameraIdList()[0];
-        } catch (CameraAccessException e) {
-            Log.e("FlashController", Objects.requireNonNull(e.getMessage()));
-            Toast.makeText(context, R.string.camera_error, Toast.LENGTH_SHORT).show();
-        }
+        torchHelper = new TorchHelper(context);
     }
 
     public void startMorseTransmission(String morseCode) {
-        if (cameraId == null) {
-            Log.e("FlashController", "Камера недоступна.");
-            return;
-        }
         if (transmissionRunning) {
             stopTransmission();
         }
 
         transmissionRunning = true;
-        handler.post(() -> { //
-            transmitMorseCode(morseCode, 0);
-        });
+        transmitMorseCode(morseCode, 0);
     }
 
-    public void stopTransmission() {
-        transmissionRunning = false;
-        handler.removeCallbacksAndMessages(null);
-        setTorch(false);
 
-        if (transmissionListener != null) {
-            transmissionListener.onTransmissionStopped();
-        }
-    }
 
 
     private void transmitMorseCode(String morseCode, int index) {
         if (!transmissionRunning || index >= morseCode.length()) {
             transmissionRunning = false;
-            setTorch(false);
+            torchHelper.setTorch(false);  // Выключаем фонарик
             stopTransmission();
             return;
         }
 
         char symbol = morseCode.charAt(index);
-
+        handler.postDelayed(() -> {
         switch (symbol) {
             case '.':
-                dot();
+                torchHelper.setTorch(true);  // Включаем фонарик для точки
                 handler.postDelayed(() -> {
-                    previousSymbol = symbol;
-                    transmitMorseCode(morseCode, index + 1);
-                }, DOT_DURATION + SYMBOL_PAUSE);
+                    torchHelper.setTorch(false);  // Выключаем после точки
+                    transmitMorseCode(morseCode, index + 1);  // Переходим к следующему символу
+                }, DOT_DURATION);
                 break;
             case '-':
-                dash();
+                torchHelper.setTorch(true);  // Включаем фонарик для тире
                 handler.postDelayed(() -> {
-                    previousSymbol = symbol;
-                    transmitMorseCode(morseCode, index + 1);
-                }, DASH_DURATION + SYMBOL_PAUSE);
-
+                    torchHelper.setTorch(false);  // Выключаем после тире
+                    transmitMorseCode(morseCode, index + 1);  // Переходим к следующему символу
+                }, DASH_DURATION);
                 break;
             case '+':
                 handler.postDelayed(() -> {
-                    previousSymbol = symbol;
-                    transmitMorseCode(morseCode, index + 1);
+                    transmitMorseCode(morseCode, index + 2);
                 }, WORD_PAUSE);
                 break;
             default:
-                if (previousSymbol == '+') {
-                    previousSymbol = symbol;
+                handler.postDelayed(() -> {
                     transmitMorseCode(morseCode, index + 1);
-                }
-                else{
-                    handler.postDelayed(() -> {
-                        previousSymbol = symbol;
-                        transmitMorseCode(morseCode, index + 1);
-                    }, LETTER_PAUSE);}
+                }, LETTER_PAUSE);
                 break;
         }
+        }, SYMBOL_PAUSE);
     }
 
-
-    private void dot() {
-        setTorch(true);
-        handler.postDelayed(() -> setTorch(false), DOT_DURATION);
-    }
-
-    private void dash() {
-        setTorch(true);
-        handler.postDelayed(() -> setTorch(false), DASH_DURATION);
-    }
-
-    private void setTorch(boolean on) {
-        try {
-            cameraManager.setTorchMode(cameraId, on);
-            isTorchOn = on;
-        } catch (CameraAccessException e) {
-            Log.e("FlashController", Objects.requireNonNull(e.getMessage()));
+    public void stopTransmission() {
+        transmissionRunning = false;
+        torchHelper.setTorch(false);  // Выключаем фонарик
+        if (transmissionListener != null) {
+            transmissionListener.onTransmissionStopped();
         }
     }
+
     public boolean isTransmissionRunning() {
         return transmissionRunning;
     }
 }
+
