@@ -1,5 +1,6 @@
 package com.example.morse_recognizer.utils;
 
+import android.graphics.Rect;
 import android.media.Image;
 import android.util.Log;
 import static com.example.morse_recognizer.values.MorseConstants.*;
@@ -20,7 +21,7 @@ public class FlashDetector {
     private boolean isFlashOn = false;
     private BrightnessListener brightnessListener;
     private boolean flash_end_flag = false;
-
+    private Rect areaToProcess = null;
 
     private StringBuilder resultText = new StringBuilder();
 
@@ -28,13 +29,19 @@ public class FlashDetector {
         this.brightnessListener = listener;
     }
 
+    public void setAreaToProcess(Rect area) {
+        this.areaToProcess = area;
+    }
     public void processImage(Image image, boolean isRecognising) {
         Image.Plane[] planes = image.getPlanes();
         ByteBuffer buffer = planes[0].getBuffer();
         byte[] data = new byte[buffer.remaining()];
         buffer.get(data);
 
-        int avgBrightness = calculateAverageBrightness(data);
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int avgBrightness = calculateAverageBrightness(data, width, height);
+
         if (isRecognising){
         checkForFlash(avgBrightness);}
 
@@ -42,14 +49,25 @@ public class FlashDetector {
     }
 
 
-    private int calculateAverageBrightness(byte[] data) {
+    private int calculateAverageBrightness(byte[] data, int width, int height) {
         int sum = 0;
-        for (byte b : data) {
-            sum += b & 0xFF;
-        }
-        return sum / data.length;
-    }
+        int count = 0;
 
+        Rect rect = (areaToProcess != null) ? areaToProcess :
+                new Rect(0, 0, width, height); // если область не задана — весь кадр
+
+        for (int y = rect.top; y < rect.bottom; y++) {
+            for (int x = rect.left; x < rect.right; x++) {
+                int index = y * width + x;
+                if (index >= 0 && index < data.length) {
+                    sum += data[index] & 0xFF;
+                    count++;
+                }
+            }
+        }
+
+        return (count > 0) ? (sum / count) : 0;
+    }
 
     private void checkForFlash(int currentBrightness) {
         long currentTime = System.currentTimeMillis();

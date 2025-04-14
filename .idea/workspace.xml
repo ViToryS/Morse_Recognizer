@@ -43,18 +43,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3d1c8797-8f94-4a92-883f-d4dbe94d7cea" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/values/MorseConstants.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/ui/RecognizingFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/ui/RecognizingFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/ui/SendingFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/ui/SendingFragment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/FlashDetector.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/FlashDetector.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/FlashlightController.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/FlashlightController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/RecognizingViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/RecognizingViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/TextToSpeechHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/TextToSpeechHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_recognizing.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_recognizing.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -269,7 +270,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-field">
           <url>file://$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/FlashDetector.java</url>
-          <line>16</line>
+          <line>17</line>
           <properties field="brightnessThreshold" class="com.example.morse_recognizer.utils.FlashDetector" />
           <option name="timeStamp" value="3" />
         </line-breakpoint>
@@ -281,6 +282,11 @@
             <option name="WATCH_EXIT" value="false" />
           </properties>
           <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/OverlayView.java</url>
+          <line>48</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

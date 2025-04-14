@@ -10,11 +10,13 @@ import android.hardware.camera2.CaptureRequest;
 import android.media.ImageReader;
 import android.os.Handler;
 import android.util.Log;
+import android.media.Image;
 import android.view.Surface;
 import android.view.TextureView;
 
 import androidx.annotation.NonNull;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class CameraHelper {
@@ -25,9 +27,29 @@ public class CameraHelper {
     private Handler backgroundHandler;
     private ImageReader imageReader;
 
-    public void startCamera(Context context, TextureView textureView, Handler backgroundHandler, ImageReader imageReader) {
+    private CameraStateListener cameraStateListener;
+    // Обработчик изображений
+    private ImageProcessingListener imageProcessingListener;
+
+    public interface CameraStateListener {
+        void onCameraOpened();
+        void onCameraError(String error);
+    }
+
+    public interface ImageProcessingListener {
+        void onImageProcessed(Image image);
+    }
+
+    public CameraHelper(Handler backgroundHandler, CameraStateListener listener, ImageProcessingListener imageListener) {
         this.backgroundHandler = backgroundHandler;
+        this.cameraStateListener = listener;
+        this.imageProcessingListener = imageListener;
+    }
+
+    public void startCamera(Context context, TextureView textureView,
+                            ImageReader imageReader, ImageProcessingListener imageProcessingListener ) {
         this.imageReader = imageReader;
+        this.imageProcessingListener = imageProcessingListener;
 
         CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
 
@@ -39,6 +61,21 @@ public class CameraHelper {
                 public void onOpened(@NonNull CameraDevice camera) {
                     cameraDevice = camera;
                     createCameraPreview(textureView);
+
+                    imageReader.setOnImageAvailableListener(reader -> {
+                        try (Image image = reader.acquireLatestImage()) {
+                            if (image != null) {
+                                if (imageProcessingListener != null) {
+                                    imageProcessingListener.onImageProcessed(image);  // Передаем изображение в слушатель
+                                }
+                            }
+                        }
+                    }, backgroundHandler);
+
+
+                    if (cameraStateListener != null) {
+                        cameraStateListener.onCameraOpened();
+                    }
                 }
 
                 @Override
@@ -51,12 +88,21 @@ public class CameraHelper {
                 public void onError(@NonNull CameraDevice camera, int error) {
                     cameraDevice.close();
                     cameraDevice = null;
+                    if (cameraStateListener != null) {
+                        cameraStateListener.onCameraError("Ошибка при открытии камеры: " + error);
+                    }
                     Log.e(TAG, "Ошибка при открытии камеры: " + error);
                 }
             }, backgroundHandler);
+
         } catch (CameraAccessException e) {
+            if (cameraStateListener != null) {
+                cameraStateListener.onCameraError("Ошибка доступа к камере");}
             Log.e(TAG, "Ошибка доступа к камере", e);
         } catch (SecurityException e) {
+            if (cameraStateListener != null) {
+                cameraStateListener.onCameraError("Нет разрешения на использование камеры");
+            }
             Log.e(TAG, "Нет разрешения на использование камеры", e);
         }
     }
@@ -70,11 +116,13 @@ public class CameraHelper {
             SurfaceTexture texture = textureView.getSurfaceTexture();
             Surface surface = new Surface(texture);
 
-            final CaptureRequest.Builder captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            final CaptureRequest.Builder captureRequestBuilder =
+                    cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.addTarget(surface);
             captureRequestBuilder.addTarget(imageReader.getSurface());
 
-            cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()), new CameraCaptureSession.StateCallback() {
+            cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()),
+                    new CameraCaptureSession.StateCallback() {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     if (cameraDevice == null) return;

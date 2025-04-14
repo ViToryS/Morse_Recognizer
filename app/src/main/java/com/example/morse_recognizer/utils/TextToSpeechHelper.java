@@ -64,6 +64,42 @@ public class TextToSpeechHelper implements TextToSpeech.OnInitListener {
         }
     }
 
+    public void speakText(String text, Runnable onStart, Runnable onDone) {
+        if (isReady && text != null) {
+            // Действие перед началом речи
+            if (onStart != null) {
+                onStart.run();
+            }
+
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "utteranceId");
+
+            // Обработка завершения речи
+            tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                @Override
+                public void onStart(String utteranceId) {
+                    if (onStart != null) {
+                        onStart.run();
+                    }
+                }
+
+                @Override
+                public void onDone(String utteranceId) {
+                    if (onDone != null) {
+                        onDone.run();
+                    }
+                }
+
+                @Override
+                public void onError(String utteranceId) {
+                    Log.e("TTS", "Error during speech synthesis.");
+                }
+            });
+        } else {
+            Log.e("TTSHelper", "TTS не инициализирован.");
+        }
+    }
+
+
     public void shutdown() {
         if (tts != null) {
             tts.stop();

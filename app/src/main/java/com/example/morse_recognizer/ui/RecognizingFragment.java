@@ -29,40 +29,41 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.morse_recognizer.R;
 import com.example.morse_recognizer.utils.CameraHelper;
 import com.example.morse_recognizer.utils.MorseCodeConverter;
+import com.example.morse_recognizer.utils.OverlayView;
 import com.example.morse_recognizer.utils.RecognizingViewModel;
 import android.view.animation.AnimationUtils;
 import com.example.morse_recognizer.utils.FlashDetector;
 import com.example.morse_recognizer.utils.TextToSpeechHelper;
 
-public class RecognizingFragment extends Fragment implements FlashDetector.BrightnessListener{
+
+public class RecognizingFragment extends Fragment implements FlashDetector.BrightnessListener,
+        CameraHelper.ImageProcessingListener, CameraHelper.CameraStateListener{
+
     private CameraHelper cameraHelper;
-    private TextureView textureView;
-    private TextView resultTextView;
-    private TextView translatedresultTextView;
-    private ImageView placeholderImage;
-    private ImageButton btnRecognize;
-    private ImageButton btnSpeak;
-    private TextView currentBrightnessTextView;
-    private MorseCodeConverter.Language currentLanguage;
     private TextToSpeechHelper ttsHelper;
     private RecognizingViewModel viewModel;
     private ActivityResultLauncher<String> requestPermissionLauncher;
-
+    private FlashDetector flashDetector;
     private Handler backgroundHandler;
     private HandlerThread backgroundThread;
 
-    private FlashDetector flashDetector;
+    private TextureView textureView;
+    private TextView resultTextView;
+    private TextView translatedResultTextView;
+    private ImageView placeholderImage;
+    private TextView currentBrightnessTextView;
+    private ImageButton btnRecognize;
+    private ImageButton btnSpeak;
     private Animation scaleAnimation;
-    private boolean isRecognizing = false;
-    TextView btnLanguage;
+    OverlayView overlayView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         viewModel = new ViewModelProvider(this).get(RecognizingViewModel.class);
-        cameraHelper = new CameraHelper();
         flashDetector = new FlashDetector();
+        ttsHelper = new TextToSpeechHelper(requireContext());
+
         requestPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
@@ -78,58 +79,46 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recognizing, container, false);
-
+        overlayView = view.findViewById(R.id.overlayView);
+        flashDetector.setAreaToProcess(overlayView.getSelectionRect());
         textureView = view.findViewById(R.id.textureView);
-        btnRecognize = view.findViewById(R.id.btnRecognize);
-        btnLanguage = view.findViewById(R.id.btnLanguage);
+        TextView btnLanguage = view.findViewById(R.id.btnLanguage);
         placeholderImage = view.findViewById(R.id.placeholderImage);
         resultTextView = view.findViewById(R.id.resultTextView);
-        translatedresultTextView = view.findViewById(R.id.textResultTextView);
+        translatedResultTextView = view.findViewById(R.id.textResultTextView);
         TextView brightnessValueTextView = view.findViewById(R.id.brightnessValueTextView);
         currentBrightnessTextView = view.findViewById(R.id.currentBrightnessTextView);
+
+        btnRecognize = view.findViewById(R.id.btnRecognize);
         SeekBar brightnessSeekBar = view.findViewById(R.id.brightnessSeekBar);
         btnSpeak = view.findViewById(R.id.btnSpeak);
+
         scaleAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_animation);
 
-        flashDetector.setBrightnessListener(this);
+        placeholderImage.setOnClickListener(v -> toggleCamera());
         textureView.setOnClickListener(v -> toggleCamera());
         btnRecognize.setOnClickListener(v -> startRecognition());
-
-        ttsHelper = new TextToSpeechHelper(requireContext());
-        ttsHelper.setListener(new TextToSpeechHelper.TTSListener() {
-            @Override
-            public void onSpeechStart() {
-                btnSpeak.setActivated(true);
-                btnSpeak.startAnimation(scaleAnimation);
-            }
-            @Override
-            public void onSpeechDone() {
-                btnSpeak.setActivated(false);
-                btnSpeak.clearAnimation();
-
-            }
-
-            @Override
-            public void onSpeechError(String error) {
-            }
-        });
-        currentLanguage = MorseCodeConverter.getCurrentLanguage();
-        updateLanguageButton();
-
+        flashDetector.setBrightnessListener(this);
         btnSpeak.setOnClickListener(v -> {
-            String textToSpeak = translatedresultTextView.getText().toString();
-            if (!textToSpeak.isEmpty()) {
+            String textToSpeak = translatedResultTextView.getText().toString();
                 String languageCode = MorseCodeConverter.getCurrentLanguage().getTtsCode();
-                ttsHelper.setLanguage(languageCode); // Устанавливаем язык
-                ttsHelper.speak(textToSpeak, languageCode);
+                ttsHelper.setLanguage(languageCode);
+                if (!textToSpeak.isEmpty()) {
+                ttsHelper.speakText(textToSpeak,
+                        () -> {
+                            btnSpeak.setActivated(true);
+                            btnSpeak.startAnimation(scaleAnimation);
+                        },
+                        () -> {
+                            btnSpeak.setActivated(false);
+                            btnSpeak.clearAnimation();
+                        });
             }
         });
         btnLanguage.setOnClickListener(v -> {
-            currentLanguage = MorseCodeConverter.Language.getNext(currentLanguage);
-            MorseCodeConverter.setLanguage(currentLanguage);
-            updateLanguageButton();
-            showResult();
+            viewModel.switchToNextLanguage();
         });
+
         brightnessSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -144,43 +133,69 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+        viewModel.getMorseText().observe(getViewLifecycleOwner(), text -> {
+            resultTextView.setText(text);
+        });
+
+        viewModel.getTranslatedText().observe(getViewLifecycleOwner(), translated -> {
+            translatedResultTextView.setText(translated);
+        });
+
+        viewModel.getBrightness().observe(getViewLifecycleOwner(), brightness -> {
+            String text = "Текущая яркость: " + brightness;
+            currentBrightnessTextView.setText(text);
+        });
+        viewModel.getLanguageButtonText().observe(getViewLifecycleOwner(), btnLanguage::setText);
+        viewModel.getIsRecognizing().observe(getViewLifecycleOwner(), recognizing -> {
+            if (recognizing != null && recognizing) {
+                btnRecognize.setActivated(true);
+                btnRecognize.startAnimation(scaleAnimation);
+            } else {
+                btnRecognize.setActivated(false);
+                btnRecognize.clearAnimation();
+            }
+        });
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        startBackgroundThread();
+        if (!textureView.isAvailable()) {
+            textureView.setSurfaceTextureListener(textureListener);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        closeCamera();
+        viewModel.setRecognizing(false);
+        stopBackgroundThread();
+        textureView.setSurfaceTextureListener(null); //новое
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroyView() {
+        closeCamera();
+        stopBackgroundThread();
+        ttsHelper.shutdown();
+        super.onDestroyView();
+    }
+
     private void startRecognition() {
-        if (viewModel.getIsCameraOn().getValue() == null || !viewModel.getIsCameraOn().getValue()) {
-            Toast.makeText(requireContext(), "Камера отключена. Включите камеру для распознавания.",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (backgroundHandler == null) {
-            startBackgroundThread();
-            Log.d("Потоки: ", "Фоновый поток запущен после нажатия на кнопку");
-        }
-        if (!isRecognizing) {
-            isRecognizing = true;
-            Log.d("Recognizing", "Обработка кадров начата");
-            btnRecognize.setActivated(true);
-            flashDetector.reset();
-            resettingResults();
-            btnRecognize.startAnimation(scaleAnimation);
-        } else {
-            isRecognizing = false;
-            Log.d("Recognizing", "Обработка кадров остановлена");
-            btnRecognize.setActivated(false);
-            btnRecognize.clearAnimation();
-            showResult();
+        if (cameraHelper != null) {
+            Boolean recognizing = viewModel.getIsRecognizing().getValue();
+            if (recognizing == null || !recognizing) {
+                viewModel.setRecognizing(true);
+                flashDetector.reset();
+                resettingResults();
+            } else {
+                viewModel.setRecognizing(false);
+            }
         }
     }
-
-    private void stopRecognition() {
-        isRecognizing = false;
-        Log.d("Recognizing", "Обработка кадров остановлена");
-        btnRecognize.setActivated(false);
-        btnRecognize.clearAnimation();
-
-    }
-
 
     private void toggleCamera() {
         if (viewModel.getIsCameraOn().getValue() == null || !viewModel.getIsCameraOn().getValue()) {
@@ -191,7 +206,7 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
             }
         } else {
             closeCamera();
-            stopRecognition();
+            viewModel.setRecognizing(false);
         }
         viewModel.toggleCamera();
         updatePlaceholderVisibility();
@@ -210,56 +225,27 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
         if (backgroundHandler == null) {
             startBackgroundThread();
         }
-        int width = textureView.getWidth();
-        int height = textureView.getHeight();
-        ImageReader imageReader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2);
-        imageReader.setOnImageAvailableListener(reader -> {
-            Image image = reader.acquireLatestImage();
-            if (image != null && isRecognizing) {
-                flashDetector.processImage(image, true);
 
-                image.close();
-            } else if (image != null) {
-                flashDetector.processImage(image, false);
-                image.close();
-            }
-        }, backgroundHandler);
-
-        cameraHelper = new CameraHelper();
-        cameraHelper.startCamera(requireContext(), textureView, backgroundHandler, imageReader);
-
-    }
-
-    private void closeCamera() {
-        cameraHelper.closeCamera();
-        stopRecognition();
-        btnRecognize.clearAnimation();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        startBackgroundThread(); // Запустить фоновый поток
+        if (cameraHelper == null) {
+            cameraHelper = new CameraHelper(backgroundHandler, this, this); // ✅ создаём после потока
+        }
         if (textureView.isAvailable()) {
+            cameraHelper.startCamera(requireContext(), textureView, createImageReader(), this);
         } else {
             textureView.setSurfaceTextureListener(textureListener);
         }
     }
 
-    @Override
-    public void onPause() {
-        closeCamera();
-        stopRecognition();
-        stopBackgroundThread();
-        super.onPause();
+    private ImageReader createImageReader() {
+        int width = textureView.getWidth();
+        int height = textureView.getHeight();
+        return ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2);
     }
 
-    @Override
-    public void onDestroyView() {
-        closeCamera();
-        stopBackgroundThread();
-        ttsHelper.shutdown();
-        super.onDestroyView();
+    private void closeCamera() {
+        if (cameraHelper != null) {
+            cameraHelper.closeCamera();}
+        viewModel.setRecognizing(false);
     }
 
     private void startBackgroundThread() {
@@ -286,25 +272,9 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
         }
     }
 
-    private final TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
-        @Override
-        public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surface, int width, int height) {
-            Log.d("TextureView", "Поверхность доступна, но камера не запущена");
-        }
-
-        @Override
-        public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surface, int width, int height) {
-        }
-
-        @Override
-        public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surface) {
-            return false;
-        }
-
-        @Override
-        public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
-        }
-    };
+    private void resettingResults() {
+        viewModel.clearTexts();
+    }
 
     private void updatePlaceholderVisibility() {
         if (viewModel.getIsCameraOn().getValue() != null && viewModel.getIsCameraOn().getValue()) {
@@ -318,31 +288,47 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
 
     @Override
     public void onBrightnessChanged(int brightness) {
-        requireActivity().runOnUiThread(() -> {
-            String text = "Текущая яркость: " + brightness;
-            currentBrightnessTextView.setText(text);
-        });
+        viewModel.updateBrightness(brightness);
     }
+
     @Override
     public void onTextUpdated(String text) {
-        requireActivity().runOnUiThread(() -> {
-            resultTextView.setText(text);
-        });
+        viewModel.updateMorseText(text);
     }
 
-    public void showResult() {
-        requireActivity().runOnUiThread(() -> {
-            String translatedText = MorseCodeConverter.
-                    convertFromMorse(resultTextView.getText().toString());
-            translatedresultTextView.setText(translatedText);
-        });
+    @Override
+    public void onCameraOpened() {
+        Log.d("CameraHelper", "Камера открыта");
     }
 
-
-    public void resettingResults() {
-        translatedresultTextView.setText("");
-        resultTextView.setText("");
+    @Override
+    public void onCameraError(String error) {
+        Log.e("CameraHelper", "Ошибка: " + error);
     }
-    private void updateLanguageButton() {
-        btnLanguage.setText(currentLanguage.getButtonText());}
+
+    @Override
+    public void onImageProcessed(Image image) {
+        Boolean recognizing = viewModel.getIsRecognizing().getValue();
+        flashDetector.setAreaToProcess(overlayView.getSelectionRect());
+        flashDetector.processImage(image, recognizing != null && recognizing);
+    }
+
+    private final TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
+        @Override
+        public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surface, int width, int height) {
+            startCamera(); // Запускаем камеру, когда поверхность готова
+        }
+
+        @Override
+        public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surface, int width, int height) {}
+
+        @Override
+        public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surface) {
+            return false;
+        }
+
+        @Override
+        public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {}
+    };
+
 }
