@@ -113,4 +113,19 @@ public class TextToSpeechHelper implements TextToSpeech.OnInitListener {
             tts.setLanguage(locale);
         }
     }
+//    public void setLanguage(String languageCode) {
+//        Locale locale;
+//        if (languageCode.contains("-")) {
+//            String[] parts = languageCode.split("-");
+//            locale = new Locale(parts[0], parts[1]);
+//        } else {
+//            locale = new Locale(languageCode); // fallback
+//        }
+//
+//        if (tts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
+//            tts.setLanguage(locale);
+//        } else {
+//            Log.w("TTSHelper", "Язык не поддерживается: " + languageCode);
+//        }
+//    }
 }

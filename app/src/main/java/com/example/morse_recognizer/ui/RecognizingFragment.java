@@ -28,9 +28,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.morse_recognizer.R;
 import com.example.morse_recognizer.utils.CameraHelper;
-import com.example.morse_recognizer.utils.MorseCodeConverter;
-import com.example.morse_recognizer.utils.OverlayView;
-import com.example.morse_recognizer.utils.RecognizingViewModel;
+import com.example.morse_recognizer.morse.MorseCodeConverter;
+import com.example.morse_recognizer.ui.components.OverlayView;
+import com.example.morse_recognizer.viewmodel.MorseViewModel;
 import android.view.animation.AnimationUtils;
 import com.example.morse_recognizer.utils.FlashDetector;
 import com.example.morse_recognizer.utils.TextToSpeechHelper;
@@ -41,7 +41,7 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
 
     private CameraHelper cameraHelper;
     private TextToSpeechHelper ttsHelper;
-    private RecognizingViewModel viewModel;
+    private MorseViewModel viewModel;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private FlashDetector flashDetector;
     private Handler backgroundHandler;
@@ -60,7 +60,7 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this).get(RecognizingViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MorseViewModel.class);
         flashDetector = new FlashDetector();
         ttsHelper = new TextToSpeechHelper(requireContext());
 
@@ -146,6 +146,7 @@ public class RecognizingFragment extends Fragment implements FlashDetector.Brigh
             currentBrightnessTextView.setText(text);
         });
         viewModel.getLanguageButtonText().observe(getViewLifecycleOwner(), btnLanguage::setText);
+
         viewModel.getIsRecognizing().observe(getViewLifecycleOwner(), recognizing -> {
             if (recognizing != null && recognizing) {
                 btnRecognize.setActivated(true);

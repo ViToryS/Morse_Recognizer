@@ -3,8 +3,9 @@ package com.example.morse_recognizer.utils;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
-import static com.example.morse_recognizer.values.MorseConstants.*;
+import static com.example.morse_recognizer.morse.MorseConstants.*;
 
 public class FlashlightController {
     private final TorchHelper torchHelper;
@@ -41,26 +42,28 @@ public class FlashlightController {
     private void transmitMorseCode(String morseCode, int index) {
         if (!transmissionRunning || index >= morseCode.length()) {
             transmissionRunning = false;
-            torchHelper.setTorch(false);  // Выключаем фонарик
+            torchHelper.setTorch(false);
             stopTransmission();
             return;
         }
 
         char symbol = morseCode.charAt(index);
+        long currentTime = System.currentTimeMillis();
+        Log.d("трансляция", "Символ: " + symbol + "Время"+ currentTime );
         handler.postDelayed(() -> {
         switch (symbol) {
             case '.':
-                torchHelper.setTorch(true);  // Включаем фонарик для точки
+                torchHelper.setTorch(true);
                 handler.postDelayed(() -> {
-                    torchHelper.setTorch(false);  // Выключаем после точки
-                    transmitMorseCode(morseCode, index + 1);  // Переходим к следующему символу
+                    torchHelper.setTorch(false);
+                    transmitMorseCode(morseCode, index + 1);
                 }, DOT_DURATION);
                 break;
             case '-':
-                torchHelper.setTorch(true);  // Включаем фонарик для тире
+                torchHelper.setTorch(true);
                 handler.postDelayed(() -> {
-                    torchHelper.setTorch(false);  // Выключаем после тире
-                    transmitMorseCode(morseCode, index + 1);  // Переходим к следующему символу
+                    torchHelper.setTorch(false);
+                    transmitMorseCode(morseCode, index + 1);
                 }, DASH_DURATION);
                 break;
             case '+':
@@ -79,7 +82,7 @@ public class FlashlightController {
 
     public void stopTransmission() {
         transmissionRunning = false;
-        torchHelper.setTorch(false);  // Выключаем фонарик
+        torchHelper.setTorch(false);
         if (transmissionListener != null) {
             transmissionListener.onTransmissionStopped();
         }

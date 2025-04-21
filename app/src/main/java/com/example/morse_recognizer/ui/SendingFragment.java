@@ -7,6 +7,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -20,21 +22,33 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.example.morse_recognizer.R;
 import com.example.morse_recognizer.utils.FlashlightController;
-import com.example.morse_recognizer.utils.MorseCodeConverter;
+import com.example.morse_recognizer.morse.MorseCodeConverter;
+import com.example.morse_recognizer.viewmodel.MorseViewModel;
+import com.example.morse_recognizer.utils.SpeechRecognitionHelper;
 
 
 public class SendingFragment extends Fragment implements FlashlightController.TransmissionListener {
+
+    private FlashlightController flashlightController;
+    private SpeechRecognitionHelper speechHelper;
+    private MorseCodeConverter.Language currentLanguage;
+    private MorseViewModel viewModel;
     private EditText inputField;
     private TextView resultField;
-    private FlashlightController flashlightController;
-    private ActivityResultLauncher<String> requestPermissionLauncher;
-    private Animation scaleAnimation;
-    private MorseCodeConverter.Language currentLanguage;
     ImageButton sendButton;
     TextView btnLanguage;
+
+    private Animation scaleAnimation;
+
+    private ActivityResultLauncher<String> audioPermissionLauncher;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        flashlightController = new FlashlightController(requireContext());
+        speechHelper = new SpeechRecognitionHelper(requireContext());
+        viewModel = new ViewModelProvider(this).get(MorseViewModel.class);
         requestPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
@@ -45,28 +59,53 @@ public class SendingFragment extends Fragment implements FlashlightController.Tr
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+        audioPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        startSpeechRecognition();
+                    } else {
+                        Toast.makeText(requireContext(), getString(R.string.need_audio_permission),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sending, container, false);
+
         inputField = view.findViewById(R.id.inputField);
+        resultField = view.findViewById(R.id.translatedResultField);
+
         sendButton = view.findViewById(R.id.sendButton);
         btnLanguage = view.findViewById(R.id.btnLanguage);
-        flashlightController = new FlashlightController(requireContext());
-        flashlightController.setTransmissionListener(this);
+        ImageButton voiceInputButton = view.findViewById(R.id.voiceInputButton);
+
         scaleAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_animation);
-        resultField = view.findViewById(R.id.translatedResultField);
 
         currentLanguage = MorseCodeConverter.getCurrentLanguage();
         updateLanguageButton();
 
+        flashlightController.setTransmissionListener(this);
         btnLanguage.setOnClickListener(v -> {
             currentLanguage = MorseCodeConverter.Language.getNext(currentLanguage);
             MorseCodeConverter.setLanguage(currentLanguage);
             updateLanguageButton();
             updateMorseTranslation();
+        });
+
+        voiceInputButton.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
+                    == PackageManager.PERMISSION_GRANTED) {
+                voiceInputButton.setActivated(true);
+                voiceInputButton.startAnimation(scaleAnimation);
+                startSpeechRecognition();
+            } else {
+                audioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
+            }
         });
 
         inputField.addTextChangedListener(new TextWatcher() {
@@ -91,11 +130,51 @@ public class SendingFragment extends Fragment implements FlashlightController.Tr
                 requestCameraPermission();
                 }
             }});
+
+        speechHelper.setListener(new SpeechRecognitionHelper.SpeechResultListener() {
+
+            @Override
+            public void onResult(String text) {
+                inputField.setText(text);
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onDone() {
+                voiceInputButton.setActivated(false);
+                voiceInputButton.clearAnimation();
+            }
+        });
+        btnLanguage.setOnClickListener(v -> {
+            viewModel.switchToNextLanguage();
+            viewModel.updateInputText(inputField.getText().toString());
+        });
+        viewModel.getLanguageButtonText().observe(getViewLifecycleOwner(), text -> btnLanguage.setText(text));
+
+        viewModel.getLanguageButtonText().observe(getViewLifecycleOwner(), btnLanguage::setText);
+        viewModel.getTranslatedText().observe(getViewLifecycleOwner(), translated -> resultField.setText(translated));
+        viewModel.getMorseText().observe(getViewLifecycleOwner(), text -> inputField.setText(text));
         return view;
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (speechHelper != null) {
+            speechHelper.destroy();
+        }
+    }
+
     private void updateLanguageButton() {
         btnLanguage.setText(currentLanguage.getButtonText());}
 
+    private void startSpeechRecognition() {
+        String langCode = MorseCodeConverter.getCurrentLanguage().getTtsCode();
+        speechHelper.startListening(langCode);
+    }
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED;
@@ -103,7 +182,6 @@ public class SendingFragment extends Fragment implements FlashlightController.Tr
 
     private void requestCameraPermission() {
         requestPermissionLauncher.launch(Manifest.permission.CAMERA);
-
     }
     private void startMorseTransmission() {
         String text = inputField.getText().toString().toUpperCase();

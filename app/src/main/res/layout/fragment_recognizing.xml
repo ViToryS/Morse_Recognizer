@@ -48,7 +48,7 @@
             android:clickable="true"
             android:focusable="true" />
 
-        <com.example.morse_recognizer.utils.OverlayView
+        <com.example.morse_recognizer.ui.components.OverlayView
             android:id="@+id/overlayView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

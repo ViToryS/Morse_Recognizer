@@ -13,5 +13,6 @@
     <string name="language_ru">РУ</string>
     <string name="recognizeResultText">Код на языке Морзе</string>
     <string name="default_language_text">Рус</string>
+    <string name="need_audio_permission">Необходимо разрешение на запись аудио</string>
 
 </resources>

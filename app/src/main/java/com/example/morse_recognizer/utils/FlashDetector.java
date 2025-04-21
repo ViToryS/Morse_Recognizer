@@ -3,7 +3,7 @@ package com.example.morse_recognizer.utils;
 import android.graphics.Rect;
 import android.media.Image;
 import android.util.Log;
-import static com.example.morse_recognizer.values.MorseConstants.*;
+import static com.example.morse_recognizer.morse.MorseConstants.*;
 import java.nio.ByteBuffer;
 
 public class FlashDetector {
@@ -14,7 +14,7 @@ public class FlashDetector {
 
     private int previousBrightness = 0;
     private static final String TAG = "FlashDetector";
-    private static final int DOT_DURATION_THRESHOLD = 300;
+    private static final int DOT_DURATION_THRESHOLD = 200;
     private int brightnessThreshold = 130;
     private long lastFlashTime = 0;
     private long lastFlashEndTime = 0;
@@ -33,14 +33,9 @@ public class FlashDetector {
         this.areaToProcess = area;
     }
     public void processImage(Image image, boolean isRecognising) {
-        Image.Plane[] planes = image.getPlanes();
-        ByteBuffer buffer = planes[0].getBuffer();
-        byte[] data = new byte[buffer.remaining()];
-        buffer.get(data);
-
         int width = image.getWidth();
         int height = image.getHeight();
-        int avgBrightness = calculateAverageBrightness(data, width, height);
+        int avgBrightness = calculateAverageBrightness(image, width, height);
 
         if (isRecognising){
         checkForFlash(avgBrightness);}
@@ -48,19 +43,30 @@ public class FlashDetector {
         updateBrightnessView(avgBrightness);
     }
 
-
-    private int calculateAverageBrightness(byte[] data, int width, int height) {
+    private int calculateAverageBrightness(Image image, int width, int height) {
         int sum = 0;
         int count = 0;
 
-        Rect rect = (areaToProcess != null) ? areaToProcess :
-                new Rect(0, 0, width, height); // если область не задана — весь кадр
+        Rect rect = (areaToProcess != null) ? areaToProcess : new Rect(0, 0, width, height);
+
+        Image.Plane plane = image.getPlanes()[0];
+        ByteBuffer buffer = plane.getBuffer();
+        int rowStride = plane.getRowStride();
+        int pixelStride = plane.getPixelStride();
+
+        byte[] yData = new byte[buffer.remaining()];
+        buffer.get(yData);
 
         for (int y = rect.top; y < rect.bottom; y++) {
             for (int x = rect.left; x < rect.right; x++) {
-                int index = y * width + x;
-                if (index >= 0 && index < data.length) {
-                    sum += data[index] & 0xFF;
+
+                int rotatedX = y;
+                int rotatedY = width - 1 - x;
+
+                int index = rotatedY * rowStride + rotatedX * pixelStride;
+                if (index >= 0 && index < yData.length) {
+                    int luminance = yData[index] & 0xFF;
+                    sum += luminance;
                     count++;
                 }
             }
@@ -68,6 +74,8 @@ public class FlashDetector {
 
         return (count > 0) ? (sum / count) : 0;
     }
+
+
 
     private void checkForFlash(int currentBrightness) {
         long currentTime = System.currentTimeMillis();
@@ -129,7 +137,7 @@ public class FlashDetector {
         lastFlashEndTime = currentTime;
         long flashDuration = lastFlashEndTime - lastFlashTime;
 
-        if (flashDuration < DOT_DURATION_THRESHOLD / COEFFICIENT ) {
+        if (flashDuration < DOT_DURATION_THRESHOLD*COEFFICIENT) {
             appendToResultText(".");
         } else {
             appendToResultText("-");
