@@ -2,44 +2,33 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="115dp">
+    android:layout_marginTop="70dp"
+    >
 
-    <LinearLayout
-        android:id="@+id/fieldsContainer"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="5dp"
-
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/brightnessSeekBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cameraContainer"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="3"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:minWidth="140dp"
-        android:minHeight="140dp"
+
+        android:layout_margin="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
         app:cardCornerRadius="30dp"
         app:cardBackgroundColor="@android:color/transparent"
         app:cardElevation="0dp"
-        app:layout_constraintDimensionRatio="H,1:1"
-    app:layout_constraintVertical_chainStyle="packed">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/fieldsContainer"
+        app:layout_constraintDimensionRatio="1:1">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="2dp">
+        android:padding="0dp">
 
         <TextureView
             android:id="@+id/textureView"
@@ -59,14 +48,25 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_camera_placeholder"
+            android:background="@color/light_purple"
+            android:src="@drawable/ic_camera_placeholder1"
             android:visibility="visible" />
 
-
-
     </FrameLayout>
-</androidx.cardview.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
+    <LinearLayout
+        android:id="@+id/fieldsContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/brightnessSeekBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cameraContainer"
+        app:layout_constraintStart_toStartOf="parent">
 
 <ScrollView
     android:id="@+id/scrollView"
@@ -134,7 +134,7 @@
         android:textSize="12sp"
         android:textColor="@android:color/black"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fieldsContainer"/> />
+        app:layout_constraintTop_toBottomOf="@+id/fieldsContainer"/>
 
     <SeekBar
         android:id="@+id/brightnessSeekBar"
@@ -160,7 +160,7 @@
     android:layout_marginEnd="8dp"
     android:layout_marginTop="4dp"
     android:textColor="@color/black"
-    android:text="130"
+    android:text="@string/_130"
     app:layout_constraintBottom_toBottomOf="@+id/brightnessSeekBar"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="@+id/brightnessLabel" />
@@ -171,7 +171,7 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
     android:layout_marginTop="8dp"
-    android:text="Текущая яркость: 0"
+    android:text="@string/current_brightness_text"
     android:textSize="12sp"
     android:textColor="@android:color/black"
     app:layout_constraintStart_toStartOf="parent"
@@ -182,7 +182,7 @@
         android:id="@+id/buttonGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -198,7 +198,7 @@
             android:background="@drawable/button_selector"
             android:gravity="center"
             android:textSize="14sp"
-            android:textColor="#000000"
+            android:textColor="@color/white"
             android:text="@string/default_language_text"
             android:padding="5dp"
             android:textStyle="bold"
@@ -211,7 +211,8 @@
             android:layout_height="65dp"
             android:background="@drawable/button_selector"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_recognize_button" />
+            android:src="@drawable/ic_recognize_button"
+            app:tint="@android:color/white"/>
 
         <ImageButton
             android:id="@+id/btnSpeak"
@@ -221,7 +222,8 @@
             android:layout_marginStart="16dp"
             android:background="@drawable/button_selector"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_speak_button" />
+            android:src="@drawable/ic_speak_button"
+            app:tint="@android:color/white"/>
     </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

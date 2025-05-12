@@ -20,9 +20,9 @@ public class SpeechRecognitionHelper {
     private final SpeechRecognizer speechRecognizer;
     private SpeechResultListener listener;
 
-    public SpeechRecognitionHelper(Context context) {
+    public SpeechRecognitionHelper(Context context, SpeechResultListener listener ) {
         this.speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context);
-        setupRecognizer();
+        setListener(listener);
     }
 
     private void setupRecognizer() {
@@ -44,7 +44,7 @@ public class SpeechRecognitionHelper {
             public void onError(int error) {
                 if (listener != null) {
                     listener.onDone();
-                    listener.onError("Ошибка распознавания речи");
+
                 }
             }
 
@@ -65,6 +65,7 @@ public class SpeechRecognitionHelper {
 
     public void setListener(SpeechResultListener listener) {
         this.listener = listener;
+        setupRecognizer();
     }
 
     public void startListening(String languageCode) {

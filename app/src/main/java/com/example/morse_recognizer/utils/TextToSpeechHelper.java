@@ -10,92 +10,65 @@ import java.util.Locale;
 public class TextToSpeechHelper implements TextToSpeech.OnInitListener {
     private final TextToSpeech tts;
     private boolean isReady = false;
-    private TTSListener listener;
+    private final TTSListener listener;
+
+    private Runnable onStartRunnable;
+    private Runnable onDoneRunnable;
 
     public interface TTSListener {
         void onSpeechStart();
+
         void onSpeechDone();
+
         void onSpeechError(String error);
     }
 
-    public TextToSpeechHelper(Context context) {
-        tts = new TextToSpeech(context, this);
+    public TextToSpeechHelper(Context context, TTSListener listener) {
+        this.tts = new TextToSpeech(context, this);
+        this.listener = listener;
 
-        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+        this.tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {
                 if (listener != null) listener.onSpeechStart();
+                if (onStartRunnable != null) onStartRunnable.run();
             }
+
             @Override
             public void onDone(String utteranceId) {
                 if (listener != null) listener.onSpeechDone();
+                if (onDoneRunnable != null) onDoneRunnable.run();
             }
+
             @Override
             public void onError(String utteranceId) {
                 if (listener != null) listener.onSpeechError("TTS error");
+                Log.e("TTS", "Error during speech synthesis.");
             }
         });
-    }
-
-    public void setListener(TTSListener listener) {
-        this.listener = listener;
     }
 
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
-            int result = tts.setLanguage(new Locale("ru", "RU"));
+            int result = this.tts.setLanguage(new Locale("ru", "RU"));
             isReady = result != TextToSpeech.LANG_MISSING_DATA &&
                     result != TextToSpeech.LANG_NOT_SUPPORTED;
-        }
-        else {
+        } else {
             Log.e("TTS", "TTS не создан");
             if (listener != null) listener.onSpeechError("TTS не создан");
         }
     }
 
-    public void speak(String text, String languageCode) {
-        if (isReady && text != null) {
-            Locale locale = new Locale(languageCode);
-            if (tts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
-                tts.setLanguage(locale);
-            }
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "utteranceId");
-        }
-    }
-
     public void speakText(String text, Runnable onStart, Runnable onDone) {
         if (isReady && text != null) {
-            // Действие перед началом речи
-            if (onStart != null) {
-                onStart.run();
-            }
+            this.onStartRunnable = onStart;
+            this.onDoneRunnable = onDone;
 
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "utteranceId");
-
-            // Обработка завершения речи
-            tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                @Override
-                public void onStart(String utteranceId) {
-                    if (onStart != null) {
-                        onStart.run();
-                    }
-                }
-
-                @Override
-                public void onDone(String utteranceId) {
-                    if (onDone != null) {
-                        onDone.run();
-                    }
-                }
-
-                @Override
-                public void onError(String utteranceId) {
-                    Log.e("TTS", "Error during speech synthesis.");
-                }
-            });
         } else {
-            Log.e("TTSHelper", "TTS не инициализирован.");
+            Log.e("TTSHelper", "TTS не инициирован или текст пустой.");
+            if (listener != null) listener.onSpeechError("TTS не готов или текст пустой");
         }
     }
 
@@ -113,19 +86,4 @@ public class TextToSpeechHelper implements TextToSpeech.OnInitListener {
             tts.setLanguage(locale);
         }
     }
-//    public void setLanguage(String languageCode) {
-//        Locale locale;
-//        if (languageCode.contains("-")) {
-//            String[] parts = languageCode.split("-");
-//            locale = new Locale(parts[0], parts[1]);
-//        } else {
-//            locale = new Locale(languageCode); // fallback
-//        }
-//
-//        if (tts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
-//            tts.setLanguage(locale);
-//        } else {
-//            Log.w("TTSHelper", "Язык не поддерживается: " + languageCode);
-//        }
-//    }
 }

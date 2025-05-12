@@ -1,11 +1,30 @@
 package com.example.morse_recognizer.morse;
 
 public class MorseConstants {
-    public static final long DOT_DURATION = 200;
-    public static final long DASH_DURATION = DOT_DURATION * 3;
-    public static final long SYMBOL_PAUSE = DOT_DURATION;
-    public static final long LETTER_PAUSE = DOT_DURATION;
-    public static final long WORD_PAUSE = DOT_DURATION * 5;
-    public static final double COEFFICIENT = 1.3;
-    public static final int BRIGHTNESS_CHANGE_THRESHOLD = 30;
+    private static long dotDuration = 200;
+
+    public static long getDotDuration() {
+        return dotDuration;
+    }
+
+    public static void setDotDuration(long duration) {
+        dotDuration = duration;
+    }
+
+    public static long getDashDuration() {
+        return dotDuration * 3;
+    }
+
+    public static long getSymbolPause() {
+        return dotDuration;
+    }
+    public static long getLetterPause() {
+        return dotDuration;
+    }
+    public static long getWordPause() {
+        return dotDuration*5;
+    }
+
+    public static final double COEFFICIENT = 2;
+
 }

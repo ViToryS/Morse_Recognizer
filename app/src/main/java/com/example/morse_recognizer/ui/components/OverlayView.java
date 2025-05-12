@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -37,6 +38,7 @@ public class OverlayView extends View {
         int bottom = top + rectWidth;
 
         selectionRect.set(left, top, right, bottom);
+
     }
 
     public OverlayView(Context context) {
@@ -50,7 +52,7 @@ public class OverlayView extends View {
     }
 
     private void init() {
-        paint.setColor(ContextCompat.getColor(getContext(), R.color.purple_500));;
+        paint.setColor(ContextCompat.getColor(getContext(), R.color.purple_500));
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(5);
     }
@@ -66,10 +68,10 @@ public class OverlayView extends View {
         Paint backgroundPaint = new Paint();
         backgroundPaint.setColor(Color.parseColor("#88000000"));
 
-        canvas.drawRect(0, 0, getWidth(), selectionRect.top, backgroundPaint); // сверху
-        canvas.drawRect(0, selectionRect.bottom, getWidth(), getHeight(), backgroundPaint); // снизу
-        canvas.drawRect(0, selectionRect.top, selectionRect.left, selectionRect.bottom, backgroundPaint); // слева
-        canvas.drawRect(selectionRect.right, selectionRect.top, getWidth(), selectionRect.bottom, backgroundPaint); // справа
+        canvas.drawRect(0, 0, getWidth(), selectionRect.top, backgroundPaint);
+        canvas.drawRect(0, selectionRect.bottom, getWidth(), getHeight(), backgroundPaint);
+        canvas.drawRect(0, selectionRect.top, selectionRect.left, selectionRect.bottom, backgroundPaint);
+        canvas.drawRect(selectionRect.right, selectionRect.top, getWidth(), selectionRect.bottom, backgroundPaint);
 
         canvas.drawRect(selectionRect, paint);
     }
@@ -128,6 +130,7 @@ public class OverlayView extends View {
     }
 
     private void resizeRect(float dx, float dy) {
+        Log.d("Resize", "До: " + selectionRect.toShortString() + ", dx: " + dx + ", dy: " + dy);
         selectionRect.right += (int) dx;
         selectionRect.bottom += (int) dy;
 
@@ -135,5 +138,6 @@ public class OverlayView extends View {
         if (selectionRect.height() < MIN_SIZE) selectionRect.bottom = selectionRect.top + MIN_SIZE;
         if (selectionRect.right > getWidth()) selectionRect.right = getWidth();
         if (selectionRect.bottom > getHeight()) selectionRect.bottom = getHeight();
+        Log.d("Resize", "После: " + selectionRect.toShortString());
     }
 }

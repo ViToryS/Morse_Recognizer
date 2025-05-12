@@ -4,36 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="120dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/enter_message"
-        android:gravity="center"
-        android:textColor="#000000"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <LinearLayout
         android:id="@+id/fieldsContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="80dp"
         android:padding="10dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonManageGroup"
+        app:layout_constraintBottom_toTopOf="@+id/interval_SeekBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleTextView">
+        app:layout_constraintTop_toTopOf="parent">
 
         <EditText
             android:id="@+id/inputField"
@@ -50,13 +33,13 @@
             android:padding="16dp"
             android:scrollbars="vertical"
             android:textColor="#000000"
-            android:textSize="18sp"/>
+            android:textSize="20sp"/>
 
         <ScrollView
             android:id="@+id/resultScrollContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2"
+            android:layout_weight="1"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
             android:background="@drawable/rounded_edittext">
@@ -68,14 +51,58 @@
                 android:minHeight="100dp"
                 android:padding="16dp"
                 android:textColor="#000000"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:hint="@string/text_result_hint_recognize"
                 android:textColorHint="#888888"
                 android:textIsSelectable="true"
                 android:gravity="top|start"
                 android:scrollbars="none"/>
         </ScrollView>
+
+
     </LinearLayout>
+
+    <TextView
+    android:id="@+id/interval_label"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:text="@string/interval_label"
+    android:textSize="12sp"
+    android:textColor="@android:color/black"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/fieldsContainer"/>
+
+    <SeekBar
+    android:id="@+id/interval_SeekBar"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="4dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="16dp"
+    android:max="7"
+    android:progress="1"
+    android:progressDrawable="@drawable/custom_progress"
+    android:thumb="@drawable/custom_thumb"
+    app:layout_constraintStart_toEndOf="@+id/interval_label"
+    app:layout_constraintEnd_toStartOf="@+id/intervalValueTextView"
+    app:layout_constraintTop_toBottomOf="@+id/fieldsContainer"
+    app:layout_constraintBottom_toTopOf="@+id/buttonManageGroup"/>
+
+
+    <TextView
+    android:id="@+id/intervalValueTextView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
+    android:layout_marginTop="4dp"
+    android:textColor="@color/black"
+    android:text="@string/base_interval"
+    app:layout_constraintBottom_toBottomOf="@+id/interval_SeekBar"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/interval_label" />
 
     <LinearLayout
         android:id="@+id/buttonManageGroup"
@@ -85,7 +112,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fieldsContainer"
+        app:layout_constraintTop_toBottomOf="@id/interval_SeekBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -97,7 +124,7 @@
             android:background="@drawable/button_selector"
             android:gravity="center"
             android:textSize="14sp"
-            android:textColor="#000000"
+            android:textColor="@color/white"
             android:text="@string/default_language_text"
             android:textStyle="bold"
             android:padding="5dp"
@@ -112,7 +139,9 @@
             android:layout_height="65dp"
             android:background="@drawable/button_selector"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_flash_button" />
+            android:src="@drawable/ic_flash_button"
+            app:tint="@android:color/white"
+            />
 
         <ImageButton
             android:id="@+id/voiceInputButton"
@@ -122,7 +151,8 @@
             android:background="@drawable/button_selector"
             android:scaleType="centerInside"
             android:padding="5dp"
-            android:src="@drawable/ic_mic" />
+            android:src="@drawable/ic_mic"
+            app:tint="@android:color/white"/>
     </LinearLayout>
 
 

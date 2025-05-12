@@ -5,7 +5,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import static com.example.morse_recognizer.morse.MorseConstants.*;
+import com.example.morse_recognizer.morse.MorseConstants;
+
 
 public class FlashlightController {
     private final TorchHelper torchHelper;
@@ -14,7 +15,6 @@ public class FlashlightController {
 
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-
 
     public interface TransmissionListener {
         void onTransmissionStopped();
@@ -25,6 +25,7 @@ public class FlashlightController {
 
     public FlashlightController(Context context) {
         torchHelper = new TorchHelper(context);
+
     }
 
     public void startMorseTransmission(String morseCode) {
@@ -37,8 +38,6 @@ public class FlashlightController {
     }
 
 
-
-
     private void transmitMorseCode(String morseCode, int index) {
         if (!transmissionRunning || index >= morseCode.length()) {
             transmissionRunning = false;
@@ -46,7 +45,6 @@ public class FlashlightController {
             stopTransmission();
             return;
         }
-
         char symbol = morseCode.charAt(index);
         long currentTime = System.currentTimeMillis();
         Log.d("трансляция", "Символ: " + symbol + "Время"+ currentTime );
@@ -57,27 +55,24 @@ public class FlashlightController {
                 handler.postDelayed(() -> {
                     torchHelper.setTorch(false);
                     transmitMorseCode(morseCode, index + 1);
-                }, DOT_DURATION);
+                }, MorseConstants.getDotDuration());
                 break;
             case '-':
                 torchHelper.setTorch(true);
                 handler.postDelayed(() -> {
                     torchHelper.setTorch(false);
                     transmitMorseCode(morseCode, index + 1);
-                }, DASH_DURATION);
+                }, MorseConstants.getDashDuration());
                 break;
             case '+':
-                handler.postDelayed(() -> {
-                    transmitMorseCode(morseCode, index + 2);
-                }, WORD_PAUSE);
+                handler.postDelayed(() -> transmitMorseCode(morseCode, index + 2),
+                        MorseConstants.getWordPause());
                 break;
             default:
-                handler.postDelayed(() -> {
-                    transmitMorseCode(morseCode, index + 1);
-                }, LETTER_PAUSE);
+                handler.postDelayed(() -> transmitMorseCode(morseCode, index + 1), MorseConstants.getLetterPause());
                 break;
         }
-        }, SYMBOL_PAUSE);
+        }, MorseConstants.getSymbolPause());
     }
 
     public void stopTransmission() {
@@ -88,8 +83,7 @@ public class FlashlightController {
         }
     }
 
-    public boolean isTransmissionRunning() {
-        return transmissionRunning;
-    }
+
+
 }
 

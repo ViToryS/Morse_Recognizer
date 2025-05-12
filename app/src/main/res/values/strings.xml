@@ -8,11 +8,16 @@
     <string name="rec_icon_mes">Распознать</string>
     <string name="result_mes_hint">Результат распознавания будет здесь</string>
     <string name="brightness_text">Порог \nяркости</string>
-    <string name="text_result_hint_recognize">Перевод будет здесь</string>
+    <string name="text_result_hint_recognize">Перевод</string>
     <string name="language_en">EN</string>
     <string name="language_ru">РУ</string>
     <string name="recognizeResultText">Код на языке Морзе</string>
     <string name="default_language_text">Рус</string>
     <string name="need_audio_permission">Необходимо разрешение на запись аудио</string>
+    <string name="interval_label">Интервал\nточки</string>
+    <string name="base_interval">200</string>
+    <string name="got_permission_camera">Разрешение получено. Нажмите кнопку еще раз</string>
+    <string name="_130">130</string>
+    <string name="current_brightness_text">Текущая яркость: 0</string>
 
 </resources>

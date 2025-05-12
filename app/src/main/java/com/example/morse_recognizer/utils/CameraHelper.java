@@ -16,7 +16,6 @@ import android.view.TextureView;
 
 import androidx.annotation.NonNull;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class CameraHelper {
@@ -24,12 +23,12 @@ public class CameraHelper {
 
     private CameraDevice cameraDevice;
     private CameraCaptureSession cameraCaptureSession;
-    private Handler backgroundHandler;
+    private final Handler backgroundHandler;
     private ImageReader imageReader;
 
-    private CameraStateListener cameraStateListener;
-    // Обработчик изображений
-    private ImageProcessingListener imageProcessingListener;
+    private final CameraStateListener cameraStateListener;
+
+    private final ImageProcessingListener imageProcessingListener;
 
     public interface CameraStateListener {
         void onCameraOpened();
@@ -47,10 +46,8 @@ public class CameraHelper {
     }
 
     public void startCamera(Context context, TextureView textureView,
-                            ImageReader imageReader, ImageProcessingListener imageProcessingListener ) {
+                            ImageReader imageReader) {
         this.imageReader = imageReader;
-        this.imageProcessingListener = imageProcessingListener;
-
         CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
 
         try {
@@ -66,7 +63,7 @@ public class CameraHelper {
                         try (Image image = reader.acquireLatestImage()) {
                             if (image != null) {
                                 if (imageProcessingListener != null) {
-                                    imageProcessingListener.onImageProcessed(image);  // Передаем изображение в слушатель
+                                    imageProcessingListener.onImageProcessed(image);
                                 }
                             }
                         }
@@ -141,7 +138,7 @@ public class CameraHelper {
                 }
             }, backgroundHandler);
         } catch (CameraAccessException e) {
-            Log.e(TAG, "Ошибка при создании превью", e);
+            Log.e(TAG, "Ошибка при создании CameraPreview", e);
         }
     }
 
@@ -149,15 +146,22 @@ public class CameraHelper {
         if (cameraCaptureSession != null) {
             try {
                 cameraCaptureSession.stopRepeating();
+                cameraCaptureSession.abortCaptures();
                 cameraCaptureSession.close();
             } catch (CameraAccessException e) {
                 Log.e(TAG, "Ошибка при закрытии сессии", e);
             }
             cameraCaptureSession = null;
         }
+
         if (cameraDevice != null) {
             cameraDevice.close();
             cameraDevice = null;
+        }
+
+        if (imageReader != null) {
+            imageReader.close();
+            imageReader = null;
         }
     }
 }

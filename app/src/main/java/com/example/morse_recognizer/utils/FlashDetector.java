@@ -4,17 +4,20 @@ import android.graphics.Rect;
 import android.media.Image;
 import android.util.Log;
 import static com.example.morse_recognizer.morse.MorseConstants.*;
+
+import com.example.morse_recognizer.morse.MorseConstants;
+
 import java.nio.ByteBuffer;
 
 public class FlashDetector {
     public interface BrightnessListener {
         void onBrightnessChanged(int brightness);
         void onTextUpdated(String text);
+        void onFpsTooLow(float fps);
+        void onTooShortFlashDetected(int brightness);
     }
-
     private int previousBrightness = 0;
     private static final String TAG = "FlashDetector";
-    private static final int DOT_DURATION_THRESHOLD = 200;
     private int brightnessThreshold = 130;
     private long lastFlashTime = 0;
     private long lastFlashEndTime = 0;
@@ -22,8 +25,14 @@ public class FlashDetector {
     private BrightnessListener brightnessListener;
     private boolean flash_end_flag = false;
     private Rect areaToProcess = null;
+    long currentTime;
+    private long lastFrameTimestamp = 0;
+    private static final float FPS_THRESHOLD = 5f;
+    private static final long LOW_FPS_DURATION_MS = 5000;
 
-    private StringBuilder resultText = new StringBuilder();
+    private long lowFpsStartTime = 0;
+    private boolean hasWarnedAboutFps = false;
+    private final StringBuilder resultText = new StringBuilder();
 
     public void setBrightnessListener(BrightnessListener listener) {
         this.brightnessListener = listener;
@@ -33,6 +42,20 @@ public class FlashDetector {
         this.areaToProcess = area;
     }
     public void processImage(Image image, boolean isRecognising) {
+
+        long currentTimestamp = System.currentTimeMillis();
+
+        if (lastFrameTimestamp > 0) {
+            long delta = currentTimestamp - lastFrameTimestamp;
+            if (delta > 0) {
+                float measuredFps = 1000f / delta;
+                Log.d(TAG, "Измеренный FPS: " + measuredFps);
+                onFpsMeasured(measuredFps);
+            }
+        }
+        lastFrameTimestamp = currentTimestamp;
+
+
         int width = image.getWidth();
         int height = image.getHeight();
         int avgBrightness = calculateAverageBrightness(image, width, height);
@@ -60,10 +83,9 @@ public class FlashDetector {
         for (int y = rect.top; y < rect.bottom; y++) {
             for (int x = rect.left; x < rect.right; x++) {
 
-                int rotatedX = y;
                 int rotatedY = width - 1 - x;
 
-                int index = rotatedY * rowStride + rotatedX * pixelStride;
+                int index = rotatedY * rowStride + y * pixelStride;
                 if (index >= 0 && index < yData.length) {
                     int luminance = yData[index] & 0xFF;
                     sum += luminance;
@@ -78,31 +100,24 @@ public class FlashDetector {
 
 
     private void checkForFlash(int currentBrightness) {
-        long currentTime = System.currentTimeMillis();
-        Log.d(TAG, "Яркость в кадре: " + currentBrightness);
-
-        int brightnessChange = currentBrightness - previousBrightness;
+        long previousCurrentTime = currentTime;
+        currentTime = System.currentTimeMillis();
+        Log.d(TAG, "Яркость в кадре: " + currentBrightness + "Время: " + currentTime );
         previousBrightness = currentBrightness;
 
         if (currentBrightness < brightnessThreshold ) {
             if (isFlashOn){
-            handleFlashEnd(currentTime, currentBrightness);}
+            handleFlashEnd(previousCurrentTime, currentBrightness);}
             flash_end_flag =false;
         }
-
 
         if (currentBrightness > brightnessThreshold) {
             if (!flash_end_flag && !isFlashOn) {
                 handleFlashStart(currentTime);
             }
 
-            if (isFlashOn && !flash_end_flag && (brightnessChange < -BRIGHTNESS_CHANGE_THRESHOLD)) {
-                handleFlashEnd(currentTime, currentBrightness);
-                flash_end_flag = true;
-            }
         }
     }
-
 
     private void handleFlashStart(long currentTime) {
         isFlashOn = true;
@@ -118,15 +133,14 @@ public class FlashDetector {
         if (lastFlashEndTime > 0) {
             long pauseDuration = lastFlashTime - lastFlashEndTime;
             Log.d(TAG, "ПАУЗА. Время: " + pauseDuration + "  Яркость: " + previousBrightness);
-            if (pauseDuration < DOT_DURATION_THRESHOLD * COEFFICIENT) {
+            if (pauseDuration < MorseConstants.getDotDuration() * COEFFICIENT) {
                 appendToResultText("");
-            } else if (pauseDuration < DOT_DURATION_THRESHOLD * 3 * COEFFICIENT) {
+            } else if (pauseDuration < MorseConstants.getDotDuration() * 3 * COEFFICIENT) {
                 appendToResultText("  ");
             } else {
                 appendToResultText("  +  ");
             }
         }
-
         Log.d(TAG, "Вспышка обнаружена: " + lastFlashTime);
         Log.d(TAG, "Тест Морзе: " + resultText);
     }
@@ -134,10 +148,14 @@ public class FlashDetector {
 
     private void handleFlashEnd(long currentTime, int currentBrightness) {
         isFlashOn = false;
-        lastFlashEndTime = currentTime;
-        long flashDuration = lastFlashEndTime - lastFlashTime;
 
-        if (flashDuration < DOT_DURATION_THRESHOLD*COEFFICIENT) {
+        long flashDuration = currentTime - lastFlashTime;
+
+        if (flashDuration < MorseConstants.getDotDuration()*0.25){
+            brightnessListener.onTooShortFlashDetected(brightnessThreshold);
+            return;}
+        lastFlashEndTime = currentTime;
+        if (flashDuration < MorseConstants.getDotDuration()*COEFFICIENT) {
             appendToResultText(".");
         } else {
             appendToResultText("-");
@@ -160,11 +178,6 @@ public class FlashDetector {
         Log.d(TAG, "Установлена яркость: " + threshold);
     }
 
-
-    public int getBrightnessThreshold() {
-        return brightnessThreshold;
-    }
-
     public void updateBrightnessView(int brightness)
     {
         if (brightnessListener != null) {
@@ -181,5 +194,20 @@ public class FlashDetector {
         flash_end_flag = false;
 
         Log.d(TAG, "Состояние детектора сброшено");
+    }
+    public void onFpsMeasured(float fps) {
+        long now = System.currentTimeMillis();
+
+        if (fps < (FPS_THRESHOLD*Math.pow((9 - MorseConstants.getDotDuration()/ 100f), 0.6))) {
+            if (lowFpsStartTime == 0) {
+                lowFpsStartTime = now;
+            } else if (now - lowFpsStartTime >= LOW_FPS_DURATION_MS && !hasWarnedAboutFps) {
+                hasWarnedAboutFps = true;
+                brightnessListener.onFpsTooLow(fps);
+            }
+        } else {
+            lowFpsStartTime = 0;
+            hasWarnedAboutFps = false;
+        }
     }
 }

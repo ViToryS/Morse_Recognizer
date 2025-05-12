@@ -35,8 +35,8 @@ public class TorchHelper {
     public void setTorch(boolean on) {
         try {
             if (cameraId != null) {
-                cameraManager.setTorchMode(cameraId, on);
 
+                cameraManager.setTorchMode(cameraId, on);
             }
         } catch (CameraAccessException e) {
             Log.e(TAG, "Не удалось изменить режим фонарика", e);
