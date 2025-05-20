@@ -8,12 +8,12 @@ import android.hardware.camera2.CameraManager;
 import android.util.Log;
 
 public class TorchHelper {
+    private static TorchHelper instance;
     private static final String TAG = "TorchHelper";
-
     private final CameraManager cameraManager;
     private String cameraId;
 
-    public TorchHelper(Context context) {
+    private TorchHelper(Context context) {
         cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         try {
             for (String id : cameraManager.getCameraIdList()) {
@@ -30,6 +30,12 @@ public class TorchHelper {
         } catch (CameraAccessException e) {
             Log.e(TAG, "Ошибка получения ID камеры", e);
         }
+    }
+    public static synchronized TorchHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new TorchHelper(context.getApplicationContext());
+        }
+        return instance;
     }
 
     public void setTorch(boolean on) {

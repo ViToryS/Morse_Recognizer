@@ -51,7 +51,7 @@ public class SendingFragment extends Fragment implements FlashlightController.Tr
 
 
         viewModel = new ViewModelProvider(requireActivity()).get(MorseViewModel.class);
-        flashlightController = new FlashlightController(requireContext());
+        flashlightController = FlashlightController.getInstance(requireContext());
         requestPermissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
@@ -133,7 +133,6 @@ public class SendingFragment extends Fragment implements FlashlightController.Tr
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    // Рассчитываем значение, кратное 100 (100, 200, ..., 800)
                     int actualValue = (progress + 1) * 100;
                     actualValue = Math.min(actualValue, 800); // Ограничение максимума
 

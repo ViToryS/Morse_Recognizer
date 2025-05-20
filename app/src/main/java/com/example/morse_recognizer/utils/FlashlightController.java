@@ -9,10 +9,22 @@ import com.example.morse_recognizer.morse.MorseConstants;
 
 
 public class FlashlightController {
+    private static FlashlightController instance;
     private final TorchHelper torchHelper;
+
     private TransmissionListener transmissionListener;
     private boolean transmissionRunning = false;
 
+    private FlashlightController(Context context) {
+        torchHelper = TorchHelper.getInstance(context);
+    }
+
+    public static synchronized FlashlightController getInstance(Context context) {
+        if (instance == null) {
+            instance = new FlashlightController(context.getApplicationContext());
+        }
+        return instance;
+    }
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -23,10 +35,7 @@ public class FlashlightController {
         this.transmissionListener = listener;
     }
 
-    public FlashlightController(Context context) {
-        torchHelper = new TorchHelper(context);
 
-    }
 
     public void startMorseTransmission(String morseCode) {
         if (transmissionRunning) {
@@ -82,8 +91,5 @@ public class FlashlightController {
             transmissionListener.onTransmissionStopped();
         }
     }
-
-
-
 }
 
