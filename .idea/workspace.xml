@@ -47,7 +47,11 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3d1c8797-8f94-4a92-883f-d4dbe94d7cea" name="Changes" comment="Добавлено: выбор продолжительности одного символа &quot;.&quot;,иконка приложения, обработка коротки вспышек, автоматическая смена порога при долгой вспышке, подсчёт кадров в секунду, изменено оформление макета, исправлено обработка получения разрешений к камере и микрофону, добавлено сохранения текста в полях при переходе между фрагментами">
+    <list default="true" id="3d1c8797-8f94-4a92-883f-d4dbe94d7cea" name="Changes" comment="Изменены классы FlashlightController и CameraHelper: доступен только один экземпляр во всем приложении">
+      <change afterPath="$PROJECT_DIR$/app/MorzeRecognizer.apk" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/checksums.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/md5-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/md5-checksums.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.7/checksums/sha1-checksums.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/checksums/sha1-checksums.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.7/fileHashes/fileHashes.lock" afterDir="false" />
@@ -55,10 +59,6 @@
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/ui/SendingFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/ui/SendingFragment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/FlashlightController.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/FlashlightController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/TorchHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/morse_recognizer/utils/TorchHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,6 +115,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -127,6 +128,7 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="KEEP" />
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
@@ -139,38 +141,39 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;AnalyzeApkAction.lastApkPath&quot;: &quot;C:/Users/storo/projects_4sem/Morse_recognizer/app/build/outputs/apk/debug/app-debug.apk&quot;,
-    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
-    &quot;ApkExportedModule&quot;: &quot;Morse_recognizer.app&quot;,
-    &quot;Application.Test.executor&quot;: &quot;Coverage&quot;,
-    &quot;ExportApk.ApkPathForMorse_recognizer.app&quot;: &quot;C:\\Users\\storo\\projects_4sem\\Morse_recognizer\\app&quot;,
-    &quot;Gradle.Morse_recognizer:app [:app:Test.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Morse_recognizer:app [:app:test.main()].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/storo/projects_4sem/Morse_recognizer/app/build/outputs/apk/debug/app-debug.apk&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "AnalyzeApkAction.lastApkPath": "C:/Users/storo/projects_4sem/Morse_recognizer/app/build/outputs/apk/debug/app-debug.apk",
+    "Android App.app.executor": "Run",
+    "ApkExportedModule": "Morse_recognizer.app",
+    "Application.Test.executor": "Coverage",
+    "ExportApk.ApkPathForMorse_recognizer.app": "C:\\Users\\storo\\projects_4sem\\Morse_recognizer\\app",
+    "Gradle.Morse_recognizer:app [:app:Test.main()].executor": "Run",
+    "Gradle.Morse_recognizer:app [:app:test.main()].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/storo/projects_4sem/Morse_recognizer/app",
+    "settings.editor.selected.configurable": "AndroidSdkUpdater"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;ExportApk.BuildVariants&quot;: [
-      &quot;release&quot;
+  "keyToStringList": {
+    "ExportApk.BuildVariants": [
+      "release"
     ],
-    &quot;kotlin-gradle-user-dirs&quot;: [
-      &quot;C:\\Users\\storo\\.gradle&quot;
+    "kotlin-gradle-user-dirs": [
+      "C:\\Users\\storo\\.gradle"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\storo\projects_4sem\Morse_recognizer\app" />
       <recent name="C:\Users\storo\projects_4sem\Morse_recognizer\app\src\main\res\drawable" />
       <recent name="C:\Users\storo\projects_4sem\Morse_recognizer\app\src\main\assets" />
     </key>
@@ -300,7 +303,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747029961006</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Изменены классы FlashlightController и CameraHelper: доступен только один экземпляр во всем приложении">
+      <option name="closed" value="true" />
+      <created>1747758695045</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1747758695045</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -319,7 +330,8 @@
     <MESSAGE value="Сделан выбор области распознавания" />
     <MESSAGE value="Добавлено голосовое распознавание на экране передачи вспышек, вывод результата в поле ввода, смена языка распознавания" />
     <MESSAGE value="Добавлено: выбор продолжительности одного символа &quot;.&quot;,иконка приложения, обработка коротки вспышек, автоматическая смена порога при долгой вспышке, подсчёт кадров в секунду, изменено оформление макета, исправлено обработка получения разрешений к камере и микрофону, добавлено сохранения текста в полях при переходе между фрагментами" />
-    <option name="LAST_COMMIT_MESSAGE" value="Добавлено: выбор продолжительности одного символа &quot;.&quot;,иконка приложения, обработка коротки вспышек, автоматическая смена порога при долгой вспышке, подсчёт кадров в секунду, изменено оформление макета, исправлено обработка получения разрешений к камере и микрофону, добавлено сохранения текста в полях при переходе между фрагментами" />
+    <MESSAGE value="Изменены классы FlashlightController и CameraHelper: доступен только один экземпляр во всем приложении" />
+    <option name="LAST_COMMIT_MESSAGE" value="Изменены классы FlashlightController и CameraHelper: доступен только один экземпляр во всем приложении" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
