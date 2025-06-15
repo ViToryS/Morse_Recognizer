@@ -18,8 +18,8 @@
 
 
 
-    <img src="images/sending.png" alt="UI" width=800px>
-    <img src="images/recognition.png" alt="UI" width=800px>
+    <img src="images/sending.png" alt="UI" width=200px>
+    <img src="images/recognition.png" alt="UI" width=200px>
 
 ### Требования
 - мобильное устройство с операционной системой Android версии не ниже 
